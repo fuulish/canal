@@ -1,15 +1,19 @@
-CC = gcc
+CC=gcc
 COMPILER_FLAGS = -Wall -g -O3 -march=native -mpc64  -fno-exceptions -ffast-math -funroll-loops -fstrict-aliasing -finline-functions
-#COMPILER_FLAGS = -w -g -O3 -ffast-math
-#COMPILER_FLAGS = -w -g -DOPENMP -fopenmp
-LIBS = -lm
-LINKER_FLAGS = $(LIBS)
-OBJ_NAME = anal
+CFLAGS=-I. $(COMPILER_FLAGS)
 
-OBJS = errors.c io.c tools.c mol.c msd.c main.c
+DEPS = errors.h io.h tools.h mol.h msd.h linreg.h main.h
+OBJ = errors.o io.o tools.o mol.o msd.o linreg.o main.o
 
-all: $(OBJS) 
-	$(CC) $(OBJS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(OBJ_NAME)
+LIBS=-lm
+
+%.o: %.c $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+anal: $(OBJ)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+.PHONY: clean
 
 clean:
-	- rm $(OBJ_NAME)
+	rm -f *.o *~ core $(INCDIR)/*~
