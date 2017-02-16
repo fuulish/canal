@@ -123,3 +123,152 @@ void get_qflux ( double *cnd, double *x, double *y, double *z, double *chg, int 
 
   // free (msd);
 }
+
+/*
+void get_qflux_dsts ( double *cnd_cc, double *cnd_ca, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, rstart )
+{
+  int i, j, r;
+  int nlns_tmp;
+  int offcnt;
+
+  double scale;
+  double *xi, *yi, *zi, *xj, *yj, *zj;
+
+  int offset = nlns / nrestart;
+
+  double *tmp = (double *) malloc ( nlns * sizeof(double));
+  double *nrm = (double *) calloc ( nlns, sizeof(double));
+  // double *msd = (double *) calloc ( nlns, sizeof(double));
+
+  // for savety reason assume the worst, i.e., conductivity/output array has not been initialized properly
+  for ( i=0; i<nlns; i++ )
+    cnd[i] = 0.;
+
+  for ( r=0; r<nrestart; r++ ){
+
+    offcnt = r*offset;
+    nlns_tmp = nlns - offcnt;
+    add_array_number_inplace ( nrm, 1., 1, nlns_tmp );
+
+    // different molecules
+    for ( i=0; i<ncol; i++ ) {
+      for ( j=i; j<ncol; j++ ) {
+
+        if ( i == j )
+          scale = 1.;
+        else
+          scale = 2.;
+
+        // get point to beginning of ncol-th sub-array
+        // then use offcnt to start a bit farther down in memory lane
+        xi = asub(x, i, nlns, offcnt);
+        yi = asub(y, i, nlns, offcnt);
+        zi = asub(z, i, nlns, offcnt);
+
+        xj = asub(x, j, nlns, offcnt);
+        yj = asub(y, j, nlns, offcnt);
+        zj = asub(z, j, nlns, offcnt);
+
+        calculate_msd_xyz_cross ( tmp, xi, yi, zi, xj,  yj, zj, nlns_tmp );
+        multiply_array_number_inplace ( tmp, chg[i]*chg[j]*scale, 1, nlns_tmp );
+
+        add_arrays_inplace ( cnd, tmp, 1, nlns_tmp );
+
+      }
+    }
+
+    printf(" %i / %i \r", r, nrestart);
+    fflush(stdout);
+
+  }
+
+  divide_array_array_inplace ( cnd, nrm, 1, nlns );
+
+  free (tmp);
+  free (nrm);
+
+  // free (msd);
+}
+*/
+
+void get_qflux_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart )
+{
+  int i, j, r;
+  int nlns_tmp;
+  int offcnt;
+
+  double scale;
+  double *xi, *yi, *zi, *xj, *yj, *zj;
+
+  int offset = nlns / nrestart;
+
+  double *tmp = (double *) malloc ( nlns * sizeof(double));
+  double *nrm = (double *) calloc ( nlns, sizeof(double));
+  // double *msd = (double *) calloc ( nlns, sizeof(double));
+
+  // for savety reason assume the worst, i.e., conductivity/output array has not been initialized properly
+  for ( i=0; i<nlns; i++ ) {
+    cnd_cc[i] = 0.;
+    cnd_ac[i] = 0.;
+    cnd_aa[i] = 0.;
+    neinst[i] = 0.;
+  }
+
+  for ( r=0; r<nrestart; r++ ){
+
+    offcnt = r*offset;
+    nlns_tmp = nlns - offcnt;
+    add_array_number_inplace ( nrm, 1., 1, nlns_tmp );
+
+    // different molecules
+    for ( i=0; i<ncol; i++ ) {
+      for ( j=i; j<ncol; j++ ) {
+
+        if ( i == j )
+          scale = 1.;
+        else
+          scale = 2.;
+
+        // get point to beginning of ncol-th sub-array
+        // then use offcnt to start a bit farther down in memory lane
+        xi = asub(x, i, nlns, offcnt);
+        yi = asub(y, i, nlns, offcnt);
+        zi = asub(z, i, nlns, offcnt);
+
+        xj = asub(x, j, nlns, offcnt);
+        yj = asub(y, j, nlns, offcnt);
+        zj = asub(z, j, nlns, offcnt);
+
+        calculate_msd_xyz_cross ( tmp, xi, yi, zi, xj,  yj, zj, nlns_tmp );
+        multiply_array_number_inplace ( tmp, chg[i]*chg[j]*scale, 1, nlns_tmp );
+
+        if ( i == j ) {
+          add_arrays_inplace ( neinst, tmp, 1, nlns_tmp );
+        }
+        else {
+          if ( (chg[i] > 0) && (chg[j] > 0) )
+            add_arrays_inplace ( cnd_cc, tmp, 1, nlns_tmp );
+          else if ( (chg[i] < 0) && (chg[j] < 0) )
+            add_arrays_inplace ( cnd_aa, tmp, 1, nlns_tmp );
+          else
+            add_arrays_inplace ( cnd_ac, tmp, 1, nlns_tmp );
+
+        }
+      }
+    }
+
+    printf(" %i / %i \r", r, nrestart);
+    fflush(stdout);
+
+  }
+
+  divide_array_array_inplace ( neinst, nrm, 1, nlns );
+  divide_array_array_inplace ( cnd_cc, nrm, 1, nlns );
+  divide_array_array_inplace ( cnd_ac, nrm, 1, nlns );
+  divide_array_array_inplace ( cnd_aa, nrm, 1, nlns );
+
+  free (tmp);
+  free (nrm);
+
+  // free (msd);
+}

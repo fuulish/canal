@@ -12,6 +12,11 @@ int main(int argc, char *argv[]) {
   int ncol, nlns;
   int qcol, nchg;
   char *delim = " ";
+  int split = 0;
+
+  if ( argc > 1 )
+    if ( strstr ( argv[1], "split" ) != NULL )
+      split = 1;
 
   double *xcom, *ycom, *zcom, *chgs;
 
@@ -43,13 +48,38 @@ int main(int argc, char *argv[]) {
   }
   */
 
-  double *qflux = (double *) calloc ( nlns, sizeof(double));
+  if ( split ) {
 
-  get_qflux ( qflux, xcom, ycom, zcom, chgs, ncol, nlns, NRESTART);
+    double *qflux_neinst = (double *) calloc ( nlns, sizeof(double));
+    double *qflux_catcat = (double *) calloc ( nlns, sizeof(double));
+    double *qflux_anicat = (double *) calloc ( nlns, sizeof(double));
+    double *qflux_aniani = (double *) calloc ( nlns, sizeof(double));
 
-  write_array_to_file ( "cond.out", qflux, 1, nlns );
+    get_qflux_srtd ( qflux_neinst, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, NRESTART);
 
-  printf("NUMBER OF COLUMNS: %i AND NUMBER OF LINES: %i\n", ncol, nlns);
+    write_array_to_file ( "cond_neinst.out", qflux_neinst, 1, nlns );
+    write_array_to_file ( "cond_catcat.out", qflux_catcat, 1, nlns );
+    write_array_to_file ( "cond_anicat.out", qflux_anicat, 1, nlns );
+    write_array_to_file ( "cond_aniani.out", qflux_aniani, 1, nlns );
+
+    printf("NUMBER OF COLUMNS: %i AND NUMBER OF LINES: %i\n", ncol, nlns);
+
+    free ( qflux_neinst );
+    free ( qflux_catcat );
+    free ( qflux_anicat );
+    free ( qflux_aniani );
+  }
+  else {
+    double *qflux = (double *) calloc ( nlns, sizeof(double));
+
+    get_qflux ( qflux, xcom, ycom, zcom, chgs, ncol, nlns, NRESTART);
+
+    write_array_to_file ( "cond_all.out", qflux, 1, nlns );
+
+    printf("NUMBER OF COLUMNS: %i AND NUMBER OF LINES: %i\n", ncol, nlns);
+
+    free ( qflux );
+  }
 
   free ( xcom );
   free ( ycom );
