@@ -8,22 +8,26 @@ void calculate_msd_one ( double *out, double *x, double *xo, int nlns )
 {
   int i;
 
-  double *xdlt = (double *) malloc ( nlns * sizeof(double) );
-  double *xodlt = (double *) malloc ( nlns * sizeof(double) );
+  double xdlt[nlns];
+  double xodlt[nlns];
+  // this one saves 10% - the others not so much
+  // double *xdlt = (double *) malloc ( nlns * sizeof(double) );
+  // double *xodlt = (double *) malloc ( nlns * sizeof(double) );
 
   subtract_array_number ( xdlt, x, x[0], 1, nlns );
   subtract_array_number ( xodlt, xo, xo[0], 1, nlns );
 
   multiply_array_array ( out, xdlt, xodlt, 1, nlns );
 
-  free ( xdlt );
-  free ( xodlt );
+  // free ( xdlt );
+  // free ( xodlt );
 }
 
 void calculate_msd_xyz ( double *out, double *x, double *y, double *z, int nlns, int offset )
 {
 
-  double *tmp = (double *) malloc ( nlns * sizeof (double));
+  // double *tmp = (double *) malloc ( nlns * sizeof (double));
+  double tmp[nlns];
 
   calculate_msd_one ( out, x, x, nlns );
 
@@ -33,14 +37,15 @@ void calculate_msd_xyz ( double *out, double *x, double *y, double *z, int nlns,
   calculate_msd_one ( tmp, z, z, nlns );
   add_arrays_inplace ( out, tmp, 1, nlns );
 
-  free (tmp);
+  // free (tmp);
 
 }
 
 void calculate_msd_xyz_cross ( double *out, double *xi, double *yi, double *zi, double *xj, double *yj, double *zj, int nlns )
 {
 
-  double *tmp = (double *) malloc ( nlns * sizeof (double));
+  // double *tmp = (double *) malloc ( nlns * sizeof (double));
+  double tmp[nlns];
 
   calculate_msd_one ( out, xi, xj, nlns );
 
@@ -50,7 +55,7 @@ void calculate_msd_xyz_cross ( double *out, double *xi, double *yi, double *zi, 
   calculate_msd_one ( tmp, zi, zj, nlns );
   add_arrays_inplace ( out, tmp, 1, nlns );
 
-  free (tmp);
+  // free (tmp);
 
 }
 
