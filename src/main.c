@@ -38,8 +38,6 @@ int main(int argc, char *argv[]) {
     return FATAL;
   }
 
-  int i, j;
-
   /* data I looks fine
   for ( i=1; i<2; i++ ) {
     for ( j=0; j<nlns; j++ ) {

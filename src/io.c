@@ -15,7 +15,9 @@ int analyze_file ( char *fname, int *ncol, int *nlns, char *delim)
   int ncolumn;
   *nlns = 0;
 
-  if ( datei = fopen(fname, "r") ) {
+  datei = fopen(fname, "r");
+
+  if ( datei != NULL ) {
     while ( getline ( &txt, &nbytes, datei ) != -1 ) {
       tok = strtok ( txt, delim );
 
@@ -54,12 +56,12 @@ double *read_file_double(char *fname, int nlns, int ncol, char *delim)
   int j =0;
 
   size_t nbytes = 0;
-  int nlines = 0;
   int ndatpt = ncol * nlns;
 
   double *data = (double *) malloc ( ndatpt * sizeof(double) );
+  datei = fopen(fname, "r");
 
-  if ( datei = fopen(fname, "r") ) {
+  if ( datei != NULL ) {
     while ( getline ( &txt, &nbytes, datei ) != -1 ) {
       tok = strtok ( txt, delim );
 
@@ -88,8 +90,9 @@ void write_array_to_file ( char *fname, double *a, int ncol, int nlns )
   int i, j;
 
   FILE *datei;
+  datei = fopen(fname, "w");
 
-  if ( datei = fopen(fname, "w") ) {
+  if ( datei != NULL ) {
 
     for ( j=0; j<nlns; j++ ) {
       for ( i=0; i<ncol; i++ ) {

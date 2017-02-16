@@ -6,8 +6,6 @@
 
 void calculate_msd_one ( double *out, double *x, double *xo, int nlns )
 {
-  int i;
-
   double xdlt[nlns];
   double xodlt[nlns];
   // this one saves 10% - the others not so much
@@ -23,7 +21,7 @@ void calculate_msd_one ( double *out, double *x, double *xo, int nlns )
   // free ( xodlt );
 }
 
-void calculate_msd_xyz ( double *out, double *x, double *y, double *z, int nlns, int offset )
+void calculate_msd_xyz ( double *out, double *x, double *y, double *z, int nlns )
 {
 
   // double *tmp = (double *) malloc ( nlns * sizeof (double));
