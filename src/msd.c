@@ -77,6 +77,7 @@ void get_qflux ( double *cnd, double *x, double *y, double *z, double *chg, int 
 
     offcnt = r*offset;
     nlns_tmp = nlns - offcnt;
+    add_array_number_inplace ( nrm, 1., 1, nlns_tmp );
 
     // different molecules
     for ( i=0; i<ncol; i++ ) {
@@ -109,6 +110,8 @@ void get_qflux ( double *cnd, double *x, double *y, double *z, double *chg, int 
     fflush(stdout);
 
   }
+
+  divide_array_array_inplace ( cnd, nrm, 1, nlns );
 
   free (tmp);
   free (nrm);
