@@ -66,6 +66,7 @@ void get_qflux ( double *cnd, double *x, double *y, double *z, double *chg, int 
   int offset = nlns / nrestart;
 
   double *tmp = (double *) malloc ( nlns * sizeof(double));
+  double *nrm = (double *) calloc ( nlns, sizeof(double));
   // double *msd = (double *) calloc ( nlns, sizeof(double));
 
   // for savety reason assume the worst, i.e., conductivity/output array has not been initialized properly
@@ -77,9 +78,6 @@ void get_qflux ( double *cnd, double *x, double *y, double *z, double *chg, int 
     offcnt = r*offset;
     nlns_tmp = nlns - offcnt;
 
-    printf("OFFCNT: %i NLNS_TMP: %i\n", offcnt, nlns_tmp);
-
-    printf("%i\n", r);
     // different molecules
     for ( i=0; i<ncol; i++ ) {
       for ( j=i; j<ncol; j++ ) {
@@ -107,8 +105,13 @@ void get_qflux ( double *cnd, double *x, double *y, double *z, double *chg, int 
       }
     }
 
+    printf(" %i / %i \r", r, nrestart);
+    fflush(stdout);
+
   }
 
   free (tmp);
+  free (nrm);
+
   // free (msd);
 }
