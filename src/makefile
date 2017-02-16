@@ -14,8 +14,10 @@ DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 _OBJ = errors.o io.o tools.o mol.o msd.o linreg.o main.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
-$(ODIR)/%.o: %.c $(DEPS) $(ODIR)
+$(ODIR)/%.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
+
+all: $(ODIR) anal
 
 anal: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
