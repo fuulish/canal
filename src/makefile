@@ -8,7 +8,7 @@ LDIR =../lib
 
 LIBS = -lm
 
-_DEPS = errors.h io.h tools.h mol.h msd.h linreg.h
+_DEPS = errors.h io.h tools.h mol.h msd.h linreg.h data.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 _OBJ = errors.o io.o tools.o mol.o msd.o linreg.o main.o
