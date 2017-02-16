@@ -35,6 +35,11 @@ void multiply_array_number ( double *out, double *a, double f, int ncol, int nln
       ael(out, nlns, i, j) = ael(a, nlns, i, j) * f;
 }
 
+void multiply_array_number_inplace (double *out, double f, int ncol, int nlns)
+{
+  multiply_array_number ( out, out, f, ncol, nlns );
+}
+
 void subtract_array_number ( double *out, double *a, double f, int ncol, int nlns )
 {
   add_array_number ( out, a, -f, ncol, nlns );

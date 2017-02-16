@@ -37,9 +37,9 @@ int analyze_file ( char *fname, int *ncol, int *nlns, char *delim)
 
     }
 
+    fclose ( datei );
   }
 
-  fclose ( datei );
   free ( txt );
 
   return 0;
@@ -75,10 +75,29 @@ double *read_file_double(char *fname, int nlns, int ncol, char *delim)
       j++;
 
     }
+    fclose ( datei );
   }
 
-  fclose ( datei );
   free ( txt );
   return data;
 
+}
+
+void write_array_to_file ( char *fname, double *a, int ncol, int nlns )
+{
+  int i, j;
+
+  FILE *datei;
+
+  if ( datei = fopen(fname, "w") ) {
+
+    for ( j=0; j<nlns; j++ ) {
+      for ( i=0; i<ncol; i++ ) {
+        fprintf(datei, " %e", ael(a, nlns, i, j));
+      }
+      fprintf(datei, "\n");
+    }
+
+    fclose ( datei );
+  }
 }
