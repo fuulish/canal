@@ -1,12 +1,12 @@
 IDIR =../include
-CC=gcc
+CC = gcc
 COMPILER_FLAGS = -Wall -g -O3 -march=native -mpc64  -fno-exceptions -ffast-math -funroll-loops -fstrict-aliasing -finline-functions
-CFLAGS=-I$(IDIR) $(COMPILER_FLAGS)
+CFLAGS = -I$(IDIR) $(COMPILER_FLAGS)
 
-ODIR=obj
+ODIR = obj
 LDIR =../lib
 
-LIBS=-lm
+LIBS = -lm
 
 _DEPS = errors.h io.h tools.h mol.h msd.h linreg.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
