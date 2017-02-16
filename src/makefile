@@ -1,6 +1,7 @@
 IDIR =../include
 CC=gcc
-CFLAGS=-I$(IDIR)
+COMPILER_FLAGS = -Wall -g -O3 -march=native -mpc64  -fno-exceptions -ffast-math -funroll-loops -fstrict-aliasing -finline-functions
+CFLAGS=-I$(IDIR) $(COMPILER_FLAGS)
 
 ODIR=obj
 LDIR =../lib
