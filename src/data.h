@@ -1,4 +1,4 @@
-#define NRESTART 1
+#define NRESTART 10
 #define AVOL 135915
 #define TEMP 349.954
 #define KBOLTZ 1.38064852e-23

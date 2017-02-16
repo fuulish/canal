@@ -91,18 +91,18 @@ void get_qflux ( double *cnd, double *x, double *y, double *z, double *chg, int 
 
         // get point to beginning of ncol-th sub-array
         // then use offcnt to start a bit farther down in memory lane
-        xi = &(x[i*nlns+offcnt]);
-        yi = &(y[i*nlns+offcnt]);
-        zi = &(z[i*nlns+offcnt]);
+        xi = asub(x, i, nlns, offcnt);
+        yi = asub(y, i, nlns, offcnt);
+        zi = asub(z, i, nlns, offcnt);
 
-        xj = &(x[j*nlns+offcnt]);
-        yj = &(y[j*nlns+offcnt]);
-        zj = &(z[j*nlns+offcnt]);
+        xj = asub(x, j, nlns, offcnt);
+        yj = asub(y, j, nlns, offcnt);
+        zj = asub(z, j, nlns, offcnt);
 
         calculate_msd_xyz_cross ( tmp, xi, yi, zi, xj,  yj, zj, nlns_tmp );
-        multiply_array_number_inplace ( tmp, chg[i]*chg[j]*scale, 1, nlns );
+        multiply_array_number_inplace ( tmp, chg[i]*chg[j]*scale, 1, nlns_tmp );
 
-        add_arrays_inplace ( cnd, tmp, 1, nlns );
+        add_arrays_inplace ( cnd, tmp, 1, nlns_tmp );
 
       }
     }

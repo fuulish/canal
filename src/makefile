@@ -1,5 +1,5 @@
 CC = g++
-COMPILER_FLAGS = -w -g
+COMPILER_FLAGS = -w -g -O3 -ffast-math
 #COMPILER_FLAGS = -w -g -DOPENMP -fopenmp
 LINKER_FLAGS = 
 OBJ_NAME = anal
