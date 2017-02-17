@@ -255,10 +255,11 @@ void get_qflux_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
       }
     }
 
-    printf(" %i / %i \r", r, nrestart);
+    printf(" %i / %i \r", (r+1), nrestart);
     fflush(stdout);
 
   }
+  printf("\n");
 
   divide_array_array_inplace ( neinst, nrm, 1, nlns );
   divide_array_array_inplace ( cnd_cc, nrm, 1, nlns );
