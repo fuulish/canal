@@ -208,10 +208,15 @@ void get_qflux_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
   double *tmp = (double *) malloc ( nlns * sizeof(double));
   double *nrm = (double *) calloc ( nlns, sizeof(double));
 
-  double *nrm_neinst = (double *) calloc ( nlns, sizeof(double));
-  double *nrm_catcat = (double *) calloc ( nlns, sizeof(double));
-  double *nrm_anicat = (double *) calloc ( nlns, sizeof(double));
-  double *nrm_aniani = (double *) calloc ( nlns, sizeof(double));
+  int arrlen = nlns;
+
+  if ( rnum )
+    arrlen = nlns * rnum;
+
+  double *nrm_neinst = (double *) calloc ( arrlen, sizeof(double));
+  double *nrm_catcat = (double *) calloc ( arrlen, sizeof(double));
+  double *nrm_anicat = (double *) calloc ( arrlen, sizeof(double));
+  double *nrm_aniani = (double *) calloc ( arrlen, sizeof(double));
 
   // double *msd = (double *) calloc ( nlns, sizeof(double));
 
