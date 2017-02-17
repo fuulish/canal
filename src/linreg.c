@@ -14,7 +14,8 @@ int linreg(int n, const REAL x[], const REAL y[], REAL* m, REAL* b, REAL* r)
   REAL sumy = 0.0;                        /* sum of y                      */
   REAL sumy2 = 0.0;                       /* sum of y**2                   */
 
-  for (int i=0;i<n;i++)
+  int i;
+  for ( i=0;i<n;i++)
   {
   sumx  += x[i];
   sumx2 += sqr(x[i]);
