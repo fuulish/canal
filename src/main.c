@@ -5,7 +5,7 @@
 #include "io.h"
 #include "macros.h"
 #include "msd.h"
-#include "data.h"
+#include "constants.h"
 
 int main(int argc, char *argv[]) {
 
@@ -13,11 +13,19 @@ int main(int argc, char *argv[]) {
   int qcol, nchg;
   int ccol, ncll;
   char *delim = " ";
+
+  int nrestart = 1;
+  double avvol = 1.;
+  double temp = 300.;
+  double timestep = 0.5;
   int split = 0;
+  int spatial = 0;
+  int rnum = 1;
+  double rstart = 5.;
+  double dr = 2.;
 
   if ( argc > 1 )
-    if ( strstr ( argv[1], "split" ) != NULL )
-      split = 1;
+    read_input( argv[1], &nrestart, &avvol, &temp, &timestep, &split, &spatial, &rnum, &rstart, &dr );
 
   double *xcom, *ycom, *zcom, *chgs, *cell;
 
@@ -57,12 +65,6 @@ int main(int argc, char *argv[]) {
 
   if ( split ) {
 
-    double dr = 2.;
-    double rstart = 5.;
-
-    // int rnum = 1;
-    int rnum = 10;
-
     int arrlen = nlns * rnum;
 
     double *qflux_neinst = (double *) calloc ( arrlen, sizeof(double));
@@ -70,8 +72,8 @@ int main(int argc, char *argv[]) {
     double *qflux_anicat = (double *) calloc ( arrlen, sizeof(double));
     double *qflux_aniani = (double *) calloc ( arrlen, sizeof(double));
 
-    get_qflux_srtd ( qflux_neinst, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, NRESTART, dr, rstart, rnum, cell );
-    // get_qflux_srtd ( qflux_neinst, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, NRESTART);
+    get_qflux_srtd ( qflux_neinst, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, nrestart, dr, rstart, rnum, cell );
+    // get_qflux_srtd ( qflux_neinst, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, nrestart);
 
     write_array_to_file ( "cond_neinst.out", qflux_neinst, 1, nlns );
     write_array_to_file ( "cond_catcat.out", qflux_catcat, rnum, nlns );
@@ -88,7 +90,7 @@ int main(int argc, char *argv[]) {
   else {
     double *qflux = (double *) calloc ( nlns, sizeof(double));
 
-    get_qflux ( qflux, xcom, ycom, zcom, chgs, ncol, nlns, NRESTART);
+    get_qflux ( qflux, xcom, ycom, zcom, chgs, ncol, nlns, nrestart);
 
     write_array_to_file ( "cond_all.out", qflux, 1, nlns );
 

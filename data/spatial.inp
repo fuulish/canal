@@ -1,0 +1,6 @@
+nrestart = 10
+spatial = 10 5. 2.
+temp =  349.954
+avvol = 135915
+timestep = 50000
+split = 1

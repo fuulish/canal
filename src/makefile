@@ -7,10 +7,11 @@ CFLAGS = -I$(IDIR) $(COMPILER_FLAGS) $(DFLAGS)
 
 ODIR = obj
 LDIR =../lib
+DDIR = ../data
 
 LIBS = -lm
 
-_DEPS = errors.h io.h tools.h mol.h msd.h linreg.h data.h
+_DEPS = errors.h io.h tools.h mol.h msd.h linreg.h constants.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 _OBJ = errors.o io.o tools.o mol.o msd.o linreg.o main.o
@@ -35,21 +36,27 @@ clean:
 distclean: clean
 	rm -rf $(ODIR) anal *.out
 
-tests: normal split
+#_INP = normal split spatial
+#INP = $(patsubst %,$(DDIR)/%, $(_INP))
+#
+#tests:
+#	./anal $@
+
+tests: normal split spatial
 
 normal:
-	./anal
+	./anal ../data/normal.inp
 	diff cond_all.out ../refs/cond_all.dat
 
 split:
-	./anal split
+	./anal ../data/split.inp
 	diff cond_neinst.out ../refs/cond_neinst.dat
 	diff cond_catcat.out ../refs/cond_catcat.dat
 	diff cond_anicat.out ../refs/cond_anicat.dat
 	diff cond_aniani.out ../refs/cond_aniani.dat
 
 spatial:
-	./anal split
+	./anal ../data/spatial.inp
 	diff cond_neinst.out ../refs/cond_neinst_spatial.dat
 	diff cond_catcat.out ../refs/cond_catcat_spatial.dat
 	diff cond_anicat.out ../refs/cond_anicat_spatial.dat
