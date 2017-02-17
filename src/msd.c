@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "macros.h"
 #include "msd.h"
+#include "mol.h"
 #include "tools.h"
 
 void calculate_msd_one ( double *out, double *x, double *xo, int nlns )
@@ -123,7 +125,7 @@ void get_qflux ( double *cnd, double *x, double *y, double *z, double *chg, int 
 }
 
 /*
-void get_qflux_dsts ( double *cnd_cc, double *cnd_ca, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, rstart )
+void get_qflux_dsts ( double *cnd_cc, double *cnd_ca, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart )
 {
   int i, j, r;
   int nlns_tmp;
@@ -189,20 +191,31 @@ void get_qflux_dsts ( double *cnd_cc, double *cnd_ca, double *cnd_aa, double *x,
 }
 */
 
-void get_qflux_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart )
+void get_qflux_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell )
 {
-  int i, j, r;
+  int i, j, n;
   int nlns_tmp;
   int offcnt;
+  int rndx;
 
   double scale;
   double *xi, *yi, *zi, *xj, *yj, *zj;
+
+  double dst;
 
   int offset = nlns / nrestart;
 
   double *tmp = (double *) malloc ( nlns * sizeof(double));
   double *nrm = (double *) calloc ( nlns, sizeof(double));
+
+  double *nrm_neinst = (double *) calloc ( nlns, sizeof(double));
+  double *nrm_catcat = (double *) calloc ( nlns, sizeof(double));
+  double *nrm_anicat = (double *) calloc ( nlns, sizeof(double));
+  double *nrm_aniani = (double *) calloc ( nlns, sizeof(double));
+
   // double *msd = (double *) calloc ( nlns, sizeof(double));
+
+  nlns_tmp = nlns*rnum;
 
   // for savety reason assume the worst, i.e., conductivity/output array has not been initialized properly
   for ( i=0; i<nlns; i++ ) {
@@ -212,9 +225,9 @@ void get_qflux_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
     neinst[i] = 0.;
   }
 
-  for ( r=0; r<nrestart; r++ ){
+  for ( n=0; n<nrestart; n++ ){
 
-    offcnt = r*offset;
+    offcnt = n*offset;
     nlns_tmp = nlns - offcnt;
     add_array_number_inplace ( nrm, 1., 1, nlns_tmp );
 
@@ -229,6 +242,7 @@ void get_qflux_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
 
         // get point to beginning of ncol-th sub-array
         // then use offcnt to start a bit farther down in memory lane
+        // FUDO| this should be asub (x, nlns, i, offcnt )
         xi = asub(x, i, nlns, offcnt);
         yi = asub(y, i, nlns, offcnt);
         zi = asub(z, i, nlns, offcnt);
@@ -244,27 +258,69 @@ void get_qflux_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
           add_arrays_inplace ( neinst, tmp, 1, nlns_tmp );
         }
         else {
-          if ( (chg[i] > 0) && (chg[j] > 0) )
-            add_arrays_inplace ( cnd_cc, tmp, 1, nlns_tmp );
-          else if ( (chg[i] < 0) && (chg[j] < 0) )
-            add_arrays_inplace ( cnd_aa, tmp, 1, nlns_tmp );
+
+          if ( rnum ) {
+            dst = get_distance_periodic(xi[0], yi[0], zi[0], xj[0], yj[0], zj[0], cell[offcnt]);
+
+            if ( dst >= rstart )
+              rndx = floor ( ( dst - rstart ) / dr );
+            else
+              rndx = 0;
+
+            if ( rndx > rnum )
+              continue;
+
+            if ( (chg[i] > 0) && (chg[j] > 0) )
+              add_array_number_inplace ( asub(nrm_catcat, nlns, rndx, 0), 1., 1, nlns_tmp );
+            else if ( (chg[i] < 0) && (chg[j] < 0) )
+              add_array_number_inplace ( asub(nrm_aniani, nlns, rndx, 0), 1., 1, nlns_tmp );
+            else
+              add_array_number_inplace ( asub(nrm_anicat, nlns, rndx, 0), 1., 1, nlns_tmp );
+
+          }
           else
-            add_arrays_inplace ( cnd_ac, tmp, 1, nlns_tmp );
+            rndx = 0;
+
+          double *ptr_cc = asub(cnd_cc, nlns, rndx, 0);
+          double *ptr_ac = asub(cnd_ac, nlns, rndx, 0);
+          double *ptr_aa = asub(cnd_aa, nlns, rndx, 0);
+
+          if ( (chg[i] > 0) && (chg[j] > 0) )
+            add_arrays_inplace ( ptr_cc, tmp, 1, nlns_tmp );
+          else if ( (chg[i] < 0) && (chg[j] < 0) )
+            add_arrays_inplace ( ptr_aa, tmp, 1, nlns_tmp );
+          else
+            add_arrays_inplace ( ptr_ac, tmp, 1, nlns_tmp );
 
         }
       }
     }
 
-    printf(" %i / %i \r", (r+1), nrestart);
+    printf(" %i / %i \r", (n+1), nrestart);
     fflush(stdout);
 
   }
   printf("\n");
 
-  divide_array_array_inplace ( neinst, nrm, 1, nlns );
-  divide_array_array_inplace ( cnd_cc, nrm, 1, nlns );
-  divide_array_array_inplace ( cnd_ac, nrm, 1, nlns );
-  divide_array_array_inplace ( cnd_aa, nrm, 1, nlns );
+  if ( rnum ) {
+    //FUDO| division needs to be done for all array elements
+    //FUDO| problemativ if nrm == 0 somewhere, which is not unlikely
+    divide_array_array_inplace ( neinst, nrm, 1, nlns*rnum );
+    divide_array_array_inplace ( cnd_cc, nrm_catcat, 1, nlns*rnum );
+    divide_array_array_inplace ( cnd_ac, nrm_anicat, 1, nlns*rnum );
+    divide_array_array_inplace ( cnd_aa, nrm_aniani, 1, nlns*rnum );
+  }
+  else {
+    divide_array_array_inplace ( neinst, nrm, 1, nlns );
+    divide_array_array_inplace ( cnd_cc, nrm, 1, nlns );
+    divide_array_array_inplace ( cnd_ac, nrm, 1, nlns );
+    divide_array_array_inplace ( cnd_aa, nrm, 1, nlns );
+  }
+
+  free (nrm_neinst);
+  free (nrm_catcat);
+  free (nrm_anicat);
+  free (nrm_aniani);
 
   free (tmp);
   free (nrm);
