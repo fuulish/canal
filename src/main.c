@@ -37,19 +37,19 @@ int main(int argc, char *argv[]) {
   double *xcom, *ycom, *zcom, *chgs, *cell;
 
   analyze_file ( xcom_fn, &ncol, &nlns, delim );
-  xcom = read_file_double ( "../data/xcom.dat", nlns, ncol, delim );
+  xcom = read_file_double ( xcom_fn, nlns, ncol, delim );
 
   analyze_file ( ycom_fn, &ncol, &nlns, delim );
-  ycom = read_file_double ( "../data/ycom.dat", nlns, ncol, delim );
+  ycom = read_file_double ( ycom_fn, nlns, ncol, delim );
 
   analyze_file ( zcom_fn, &ncol, &nlns, delim );
-  zcom = read_file_double ( "../data/zcom.dat", nlns, ncol, delim );
+  zcom = read_file_double ( zcom_fn, nlns, ncol, delim );
 
   analyze_file ( chgs_fn, &qcol, &nchg, delim );
-  chgs = read_file_double ( "../data/charges.dat", nchg, qcol, delim );
+  chgs = read_file_double ( chgs_fn, nchg, qcol, delim );
 
   analyze_file ( cell_fn, &ccol, &ncll, delim );
-  cell = read_file_double ( "../data/cell.dat", ncll, ccol, delim );
+  cell = read_file_double ( cell_fn, ncll, ccol, delim );
 
   printf("NCHGS: %i, NCOL: %i\n", nchg, ncol);
   if ( nchg != ncol ) {
