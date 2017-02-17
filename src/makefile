@@ -32,3 +32,16 @@ clean:
 
 distclean: clean
 	rm -rf $(ODIR) anal
+
+tests: normal split
+
+normal:
+	./anal
+	diff cond_all.out ../refs/cond_all.dat
+
+split:
+	./anal split
+	diff cond_neinst.out ../refs/cond_neinst.dat
+	diff cond_catcat.out ../refs/cond_catcat.dat
+	diff cond_anicat.out ../refs/cond_anicat.dat
+	diff cond_aniani.out ../refs/cond_aniani.dat
