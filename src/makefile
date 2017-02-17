@@ -11,10 +11,10 @@ DDIR = ../data
 
 LIBS = -lm
 
-_DEPS = errors.h io.h tools.h mol.h msd.h linreg.h constants.h
+_DEPS = errors.h io.h tools.h mol.h msd.h linreg.h constants.h vel.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = errors.o io.o tools.o mol.o msd.o linreg.o main.o
+_OBJ = errors.o io.o tools.o mol.o msd.o linreg.o vel.o main.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 $(ODIR)/%.o: %.c $(DEPS)
