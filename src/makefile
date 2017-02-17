@@ -1,7 +1,9 @@
 IDIR =../include
 CC = gcc
 COMPILER_FLAGS = -Wall -g -O3 -march=native -mpc64  -fno-exceptions -ffast-math -funroll-loops -fstrict-aliasing -finline-functions
-CFLAGS = -I$(IDIR) $(COMPILER_FLAGS)
+#COMPILER_FLAGS = -Wall -g -O2 -march=native -mpc64  -fno-exceptions -funroll-loops -fstrict-aliasing -finline-functions
+DFLAGS = -DDEBUG
+CFLAGS = -I$(IDIR) $(COMPILER_FLAGS) $(DFLAGS)
 
 ODIR = obj
 LDIR =../lib
@@ -31,7 +33,7 @@ clean:
 	rm -f $(ODIR)/*.o *~ core $(INCDIR)/*~
 
 distclean: clean
-	rm -rf $(ODIR) anal
+	rm -rf $(ODIR) anal *.out
 
 tests: normal split
 
@@ -45,3 +47,10 @@ split:
 	diff cond_catcat.out ../refs/cond_catcat.dat
 	diff cond_anicat.out ../refs/cond_anicat.dat
 	diff cond_aniani.out ../refs/cond_aniani.dat
+
+spatial:
+	./anal split
+	diff cond_neinst.out ../refs/cond_neinst_spatial.dat
+	diff cond_catcat.out ../refs/cond_catcat_spatial.dat
+	diff cond_anicat.out ../refs/cond_anicat_spatial.dat
+	diff cond_aniani.out ../refs/cond_aniani_spatial.dat

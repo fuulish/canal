@@ -42,6 +42,11 @@ int main(int argc, char *argv[]) {
     return FATAL;
   }
 
+  if ( ncll != nlns ) {
+    print_error ( FATAL, "Dimensions of cell array and position data don't match", __FILE__, __LINE__ );
+    return FATAL;
+  }
+
   /* data I looks fine
   for ( i=1; i<2; i++ ) {
     for ( j=0; j<nlns; j++ ) {
@@ -52,14 +57,13 @@ int main(int argc, char *argv[]) {
 
   if ( split ) {
 
-    double dr = 0.;
-    double rstart = 0;
-    int rnum = 0;
+    double dr = 2.;
+    double rstart = 5.;
 
-    int arrlen = nlns;
+    // int rnum = 1;
+    int rnum = 10;
 
-    if ( rnum )
-      arrlen = nlns * rnum;
+    int arrlen = nlns * rnum;
 
     double *qflux_neinst = (double *) calloc ( arrlen, sizeof(double));
     double *qflux_catcat = (double *) calloc ( arrlen, sizeof(double));
@@ -70,9 +74,9 @@ int main(int argc, char *argv[]) {
     // get_qflux_srtd ( qflux_neinst, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, NRESTART);
 
     write_array_to_file ( "cond_neinst.out", qflux_neinst, 1, nlns );
-    write_array_to_file ( "cond_catcat.out", qflux_catcat, 1, nlns );
-    write_array_to_file ( "cond_anicat.out", qflux_anicat, 1, nlns );
-    write_array_to_file ( "cond_aniani.out", qflux_aniani, 1, nlns );
+    write_array_to_file ( "cond_catcat.out", qflux_catcat, rnum, nlns );
+    write_array_to_file ( "cond_anicat.out", qflux_anicat, rnum, nlns );
+    write_array_to_file ( "cond_aniani.out", qflux_aniani, rnum, nlns );
 
     printf("NUMBER OF COLUMNS: %i AND NUMBER OF LINES: %i\n", ncol, nlns);
 

@@ -5,6 +5,9 @@
 #include "msd.h"
 #include "mol.h"
 #include "tools.h"
+#ifdef DEBUG
+#include "io.h"
+#endif
 
 void calculate_msd_one ( double *out, double *x, double *xo, int nlns )
 {
@@ -208,12 +211,9 @@ void get_qflux_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
   double *tmp = (double *) malloc ( nlns * sizeof(double));
   double *nrm = (double *) calloc ( nlns, sizeof(double));
 
-  int arrlen = nlns;
+  int arrlen = nlns * rnum;
 
-  if ( rnum )
-    arrlen = nlns * rnum;
-
-  double *nrm_neinst = (double *) calloc ( arrlen, sizeof(double));
+  // double *nrm_neinst = (double *) calloc ( arrlen, sizeof(double));
   double *nrm_catcat = (double *) calloc ( arrlen, sizeof(double));
   double *nrm_anicat = (double *) calloc ( arrlen, sizeof(double));
   double *nrm_aniani = (double *) calloc ( arrlen, sizeof(double));
@@ -264,15 +264,15 @@ void get_qflux_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
         }
         else {
 
-          if ( rnum ) {
+          if ( rnum > 1 ) {
             dst = get_distance_periodic(xi[0], yi[0], zi[0], xj[0], yj[0], zj[0], cell[offcnt]);
 
             if ( dst >= rstart )
-              rndx = floor ( ( dst - rstart ) / dr );
+              rndx = (int) floor ( ( dst - rstart ) / dr );
             else
               rndx = 0;
 
-            if ( rndx > rnum )
+            if ( rndx >= rnum )
               continue;
 
             if ( (chg[i] > 0) && (chg[j] > 0) )
@@ -307,22 +307,40 @@ void get_qflux_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
   }
   printf("\n");
 
-  if ( rnum ) {
-    //FUDO| division needs to be done for all array elements
-    //FUDO| problemativ if nrm == 0 somewhere, which is not unlikely
-    divide_array_array_inplace ( neinst, nrm, 1, nlns*rnum );
-    divide_array_array_inplace ( cnd_cc, nrm_catcat, 1, nlns*rnum );
-    divide_array_array_inplace ( cnd_ac, nrm_anicat, 1, nlns*rnum );
-    divide_array_array_inplace ( cnd_aa, nrm_aniani, 1, nlns*rnum );
+  double *ptr_nrm_ne;
+  double *ptr_nrm_cc;
+  double *ptr_nrm_ac;
+  double *ptr_nrm_aa;
+
+  if ( rnum > 1 ) {
+    ptr_nrm_ne = nrm;
+    ptr_nrm_cc = nrm_catcat;
+    ptr_nrm_ac = nrm_anicat;
+    ptr_nrm_aa = nrm_aniani;
+
   }
   else {
-    divide_array_array_inplace ( neinst, nrm, 1, nlns );
-    divide_array_array_inplace ( cnd_cc, nrm, 1, nlns );
-    divide_array_array_inplace ( cnd_ac, nrm, 1, nlns );
-    divide_array_array_inplace ( cnd_aa, nrm, 1, nlns );
+    ptr_nrm_ne = nrm;
+    ptr_nrm_cc = nrm;
+    ptr_nrm_ac = nrm;
+    ptr_nrm_aa = nrm;
   }
 
-  free (nrm_neinst);
+  //FUDO| division needs to be done for all array elements
+  //FUDO| problemativ if nrm == 0 somewhere, which is not unlikely
+  divide_array_array_inplace ( neinst, ptr_nrm_ne, 1, nlns );
+  divide_array_array_inplace ( cnd_cc, ptr_nrm_cc, 1, nlns*rnum );
+  divide_array_array_inplace ( cnd_ac, ptr_nrm_ac, 1, nlns*rnum );
+  divide_array_array_inplace ( cnd_aa, ptr_nrm_aa, 1, nlns*rnum );
+
+#ifdef DEBUG
+  write_array_to_file ( "norm_neinst.out", ptr_nrm_ne, 1, nlns );
+  write_array_to_file ( "norm_catcat.out", ptr_nrm_cc, rnum, nlns );
+  write_array_to_file ( "norm_anicat.out", ptr_nrm_ac, rnum, nlns );
+  write_array_to_file ( "norm_aniani.out", ptr_nrm_aa, rnum, nlns );
+#endif
+
+  // free (nrm_neinst);
   free (nrm_catcat);
   free (nrm_anicat);
   free (nrm_aniani);
