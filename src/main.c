@@ -52,14 +52,19 @@ int main(int argc, char *argv[]) {
 
   if ( split ) {
 
-    double *qflux_neinst = (double *) calloc ( nlns, sizeof(double));
-    double *qflux_catcat = (double *) calloc ( nlns, sizeof(double));
-    double *qflux_anicat = (double *) calloc ( nlns, sizeof(double));
-    double *qflux_aniani = (double *) calloc ( nlns, sizeof(double));
-
     double dr = 0.;
     double rstart = 0;
     int rnum = 0;
+
+    int arrlen = nlns;
+
+    if ( rnum )
+      arrlen = nlns * rnum;
+
+    double *qflux_neinst = (double *) calloc ( arrlen, sizeof(double));
+    double *qflux_catcat = (double *) calloc ( arrlen, sizeof(double));
+    double *qflux_anicat = (double *) calloc ( arrlen, sizeof(double));
+    double *qflux_aniani = (double *) calloc ( arrlen, sizeof(double));
 
     get_qflux_srtd ( qflux_neinst, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, NRESTART, dr, rstart, rnum, cell );
     // get_qflux_srtd ( qflux_neinst, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, NRESTART);
