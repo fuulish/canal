@@ -24,24 +24,31 @@ int main(int argc, char *argv[]) {
   double rstart = 5.;
   double dr = 2.;
 
+  char xcom_fn[100];
+  char ycom_fn[100];
+  char zcom_fn[100];
+
+  char chgs_fn[100];
+  char cell_fn[100];
+
   if ( argc > 1 )
-    read_input( argv[1], &nrestart, &avvol, &temp, &timestep, &split, &spatial, &rnum, &rstart, &dr );
+    read_input( argv[1], &nrestart, &avvol, &temp, &timestep, &split, &spatial, &rnum, &rstart, &dr, xcom_fn, ycom_fn, zcom_fn, chgs_fn, cell_fn );
 
   double *xcom, *ycom, *zcom, *chgs, *cell;
 
-  analyze_file ( "../data/xcom.dat", &ncol, &nlns, delim );
+  analyze_file ( xcom_fn, &ncol, &nlns, delim );
   xcom = read_file_double ( "../data/xcom.dat", nlns, ncol, delim );
 
-  analyze_file ( "../data/ycom.dat", &ncol, &nlns, delim );
+  analyze_file ( ycom_fn, &ncol, &nlns, delim );
   ycom = read_file_double ( "../data/ycom.dat", nlns, ncol, delim );
 
-  analyze_file ( "../data/zcom.dat", &ncol, &nlns, delim );
+  analyze_file ( zcom_fn, &ncol, &nlns, delim );
   zcom = read_file_double ( "../data/zcom.dat", nlns, ncol, delim );
 
-  analyze_file ( "../data/charges.dat", &qcol, &nchg, delim );
+  analyze_file ( chgs_fn, &qcol, &nchg, delim );
   chgs = read_file_double ( "../data/charges.dat", nchg, qcol, delim );
 
-  analyze_file ( "../data/cell.dat", &ccol, &ncll, delim );
+  analyze_file ( cell_fn, &ccol, &ncll, delim );
   cell = read_file_double ( "../data/cell.dat", ncll, ccol, delim );
 
   printf("NCHGS: %i, NCOL: %i\n", nchg, ncol);

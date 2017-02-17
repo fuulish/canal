@@ -108,7 +108,7 @@ void write_array_to_file ( char *fname, double *a, int ncol, int nlns )
   }
 }
 
-void read_input( char *fname, int *nrestart, double *avvol, double *temp, double *timestep, int *split, int *spatial, int *rnum, double *rstart, double *dr )
+void read_input( char *fname, int *nrestart, double *avvol, double *temp, double *timestep, int *split, int *spatial, int *rnum, double *rstart, double *dr, char *xcom_fn, char *ycom_fn, char *zcom_fn, char *chgs_fn, char *cell_fn )
 {
     FILE *datei;
     char *txt;
@@ -125,14 +125,24 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
       TIMESTEP,
       SPLIT,
       SPATIAL,
+      XCOM,
+      YCOM,
+      ZCOM,
+      CHGS,
+      CELL,
     };
 
-    int set_nrestart = NRESTART;
-    int set_avvol = AVVOL;
-    int set_temp = TEMP;
-    int set_timestep = TIMESTEP;
-    int set_split = SPLIT;
-    int set_spatial = SPATIAL;
+    int def_nrestart = NRESTART;
+    int def_avvol = AVVOL;
+    int def_temp = TEMP;
+    int def_timestep = TIMESTEP;
+    int def_split = SPLIT;
+    int def_spatial = SPATIAL;
+    int def_xcom = XCOM;
+    int def_ycom = YCOM;
+    int def_zcom = ZCOM;
+    int def_chgs = CHGS;
+    int def_cell = CELL;
 
     datei = fopen(fname, "r");
 
@@ -148,32 +158,32 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
       if ( strstr(variable, "nrestart") != NULL )
       {
         *nrestart = atol(value);
-        set_nrestart = 0;
+        def_nrestart = 0;
       }
       else if ( strstr(variable, "avvol") != NULL )
       {
         *avvol = atof(value);
-        set_avvol = 0;
+        def_avvol = 0;
       }
       else if ( strstr(variable, "temp") != NULL )
       {
         *temp= atof(value);
-        set_temp = 0;
+        def_temp = 0;
       }
       else if ( strstr(variable, "timestep") != NULL )
       {
         *timestep = atof(value);
-        set_timestep = 0;
+        def_timestep = 0;
       }
       else if ( strstr(variable, "split") != NULL )
       {
         *split = atoi(value);
-        set_split = 0;
+        def_split = 0;
       }
       else if ( strstr(variable, "spatial") != NULL )
       {
         *spatial = 1;
-        set_spatial = 0;
+        def_spatial = 0;
 
         buf = strtok (value, " ");
         *rnum = atoi(buf);
@@ -185,25 +195,70 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
         *dr = atof(buf);
 
       }
+      else if ( strstr(variable, "xcom") != NULL )
+      {
+        buf = strtok (value, " \n");
+        strcpy ( xcom_fn, buf );
+        def_xcom = 0;
+      }
+      else if ( strstr(variable, "ycom") != NULL )
+      {
+        buf = strtok (value, " \n");
+        strcpy ( ycom_fn, buf );
+        def_ycom = 0;
+      }
+      else if ( strstr(variable, "zcom") != NULL )
+      {
+        buf = strtok (value, " \n");
+        strcpy ( zcom_fn, buf );
+        def_zcom = 0;
+      }
+      else if ( strstr(variable, "chgs") != NULL )
+      {
+        buf = strtok (value, " \n");
+        strcpy ( chgs_fn, buf );
+        def_chgs = 0;
+      }
+      else if ( strstr(variable, "cell") != NULL )
+      {
+        buf = strtok (value, " \n");
+        strcpy ( cell_fn, buf );
+        def_cell = 0;
+      }
     }
 
-    if ( set_nrestart == NRESTART )
+    if ( def_nrestart == NRESTART )
       print_warning ( YOU_KNOW_WHAT, "Using defaults for NRESTART");
 
-    if ( set_avvol == AVVOL )
+    if ( def_avvol == AVVOL )
       print_warning ( YOU_KNOW_WHAT, "Using defaults for AVVOL");
 
-    if ( set_temp == TEMP )
+    if ( def_temp == TEMP )
       print_warning ( YOU_KNOW_WHAT, "Using defaults for TEMP");
 
-    if ( set_timestep == TIMESTEP )
+    if ( def_timestep == TIMESTEP )
       print_warning ( YOU_KNOW_WHAT, "Using defaults for TIMESTEP");
 
-    if ( set_split == SPLIT )
+    if ( def_split == SPLIT )
       print_warning ( YOU_KNOW_WHAT, "Using defaults for SPLIT");
 
-    if ( set_spatial == SPATIAL )
+    if ( def_spatial == SPATIAL )
       print_warning ( YOU_KNOW_WHAT, "Using defaults for SPATIAL");
+
+    if ( def_xcom == XCOM )
+      print_error ( INCOMPLETE_INPUT, "XCOM file is missing", __FILE__, __LINE__);
+
+    if ( def_ycom == YCOM )
+      print_error ( INCOMPLETE_INPUT, "YCOM file is missing", __FILE__, __LINE__);
+
+    if ( def_zcom == ZCOM )
+      print_error ( INCOMPLETE_INPUT, "ZCOM file is missing", __FILE__, __LINE__);
+
+    if ( def_chgs == CHGS )
+      print_error ( INCOMPLETE_INPUT, "CHGS file is missing", __FILE__, __LINE__);
+
+    if ( def_cell == CELL )
+      print_error ( INCOMPLETE_INPUT, "CELL file is missing", __FILE__, __LINE__);
 
     fclose(datei);
     free(txt);
