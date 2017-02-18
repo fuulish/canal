@@ -84,167 +84,131 @@ void calculate_velocities ( double *vx, double *vy, double *vz, double *xi, doub
 
 }
 
-void get_vflux_locl ( double *neinst, double *cnd_cc, double *cnd_ac, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell )
+//FUDO| we shouldn't need neinst, because it'll always be 1
+void get_vflux_locl ( double *neinst, double *cnd_cc, double *cnd_ac, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell, double timestep )
 {
   int i, j, n;
   int nlns_tmp;
-  int offcnt;
   int rndx;
 
-  double scale;
+  double *vx, *vy, *vz;
+  double *ptr_vxi, *ptr_vyi, *ptr_vzi, *ptr_vxj, *ptr_vyj, *ptr_vzj;
   double *xi, *yi, *zi, *xj, *yj, *zj;
 
-  double dst;
+  int arrlen;
 
-  int offset = nlns / nrestart;
+  //FUDO| each array has nlns time entries, and ncol molecule entries
+  arrlen = nlns * ncol;
 
-  double *tmp = (double *) malloc ( nlns * sizeof(double));
-  double *nrm = (double *) calloc ( nlns, sizeof(double));
-
-  int arrlen = nlns * rnum;
+  vx = (double *) malloc(arrlen * sizeof(double));
+  vy = (double *) malloc(arrlen * sizeof(double));
+  vz = (double *) malloc(arrlen * sizeof(double));
 
   //FUDO| need to transform x,y,z data to vx,vy,vz data
+  calculate_velocities ( vx, vy, vz, x, y, z, arrlen, timestep );
 
-  // double *nrm_neinst = (double *) calloc ( arrlen, sizeof(double));
-  double *nrm_catcat = (double *) calloc ( arrlen, sizeof(double));
-  double *nrm_anicat = (double *) calloc ( arrlen, sizeof(double));
-  double *nrm_aniani = (double *) calloc ( arrlen, sizeof(double));
+  int nrmlen;
 
-  // double *msd = (double *) calloc ( nlns, sizeof(double));
+  //FUDO| for each kind of correlation only a distance dependence, we will average over all molecules/kinds
+  nrmlen = rnum;
 
-  nlns_tmp = nlns*rnum;
+  double  *nrm_cc = calloc(nrmlen, sizeof(double));
+  double  *nrm_ac = calloc(nrmlen, sizeof(double));
+  double  *nrm_aa = calloc(nrmlen, sizeof(double));
 
-  // for savety reason assume the worst, i.e., conductivity/output array has not been initialized properly
-  for ( i=0; i<nlns; i++ ) {
+  for ( i=0; i<rnum; i++ ) {
     cnd_cc[i] = 0.;
     cnd_ac[i] = 0.;
     cnd_aa[i] = 0.;
     neinst[i] = 0.;
   }
 
-  for ( n=0; n<nrestart; n++ ){
+  for ( n=0; n<nlns; n++ ) {
 
-    offcnt = n*offset;
-    nlns_tmp = nlns - offcnt;
-    add_array_number_inplace ( nrm, 1., 1, nlns_tmp );
-
-    // different molecules
     for ( i=0; i<ncol; i++ ) {
       for ( j=i; j<ncol; j++ ) {
 
-        if ( i == j )
-          scale = 1.;
-        else
-          scale = 2.;
+        ptr_vxi = asub(vx, nlns, i, n);
+        ptr_vyi = asub(vy, nlns, i, n);
+        ptr_vzi = asub(vz, nlns, i, n);
+                               
+        ptr_vxj = asub(vx, nlns, j, n);
+        ptr_vyj = asub(vy, nlns, j, n);
+        ptr_vzj = asub(vz, nlns, j, n);
 
-        // get point to beginning of ncol-th sub-array
-        // then use offcnt to start a bit farther down in memory lane
-        // FUDO| this should be asub (x, nlns, i, offcnt )
-        xi = asub(x, i, nlns, offcnt);
-        yi = asub(y, i, nlns, offcnt);
-        zi = asub(z, i, nlns, offcnt);
-
-        xj = asub(x, j, nlns, offcnt);
-        yj = asub(y, j, nlns, offcnt);
-        zj = asub(z, j, nlns, offcnt);
+        xi = asub(x, nlns, i, n);
+        yi = asub(y, nlns, i, n);
+        zi = asub(z, nlns, i, n);
+                         
+        xj = asub(x, nlns, j, n);
+        yj = asub(y, nlns, j, n);
+        zj = asub(z, nlns, j, n);
 
         nlns_tmp = 1;
-        double dot = calculate_dot ( xi, yi, zi, xj, yj, zj, nlns_tmp );
-        double nrm_i = calculate_nrm ( xi, yi, zi, nlns_tmp );
-        double nrm_j = calculate_nrm ( xj, yj, zj, nlns_tmp );
+        double dot = calculate_dot ( ptr_vxi, ptr_vyi, ptr_vzi, ptr_vxj, ptr_vyj, ptr_vzj, nlns_tmp );
+        double nrm_i = calculate_nrm ( ptr_vxi, ptr_vyi, ptr_vzi, nlns_tmp );
+        double nrm_j = calculate_nrm ( ptr_vxj, ptr_vyj, ptr_vzj, nlns_tmp );
 
         dot /= (nrm_i * nrm_j);
 
-        multiply_array_number_inplace ( tmp, chg[i]*chg[j]*scale, 1, nlns_tmp );
+        double dst = get_distance_periodic(xi[0], yi[0], zi[0], xj[0], yj[0], zj[0], cell[n]);
 
-        if ( i == j ) {
-          add_arrays_inplace ( neinst, tmp, 1, nlns_tmp );
+        if ( dst >= rstart )
+          rndx = (int) floor ( ( dst - rstart ) / dr );
+        else
+          rndx = 0;
+
+        if ( rndx >= rnum )
+          continue;
+
+        if ( (chg[i] > 0) && (chg[j] > 0) ) {
+          ael(cnd_cc, rnum, i, j) += dot;
+          ael(nrm_cc, rnum, i, j) += 1.;
+
+          ael(cnd_cc, rnum, j, i) += dot;
+          ael(nrm_cc, rnum, j, i) += 1.;
+        }
+        else if ( (chg[i] < 0) && (chg[j] < 0) ) {
+          ael(cnd_aa, rnum, i, j) += dot;
+          ael(nrm_aa, rnum, i, j) += 1.;
+
+          ael(cnd_aa, rnum, j, i) += dot;
+          ael(nrm_aa, rnum, j, i) += 1.;
         }
         else {
+          ael(cnd_ac, rnum, i, j) += dot;
+          ael(nrm_ac, rnum, i, j) += 1.;
 
-          if ( rnum > 1 ) {
-            dst = get_distance_periodic(xi[0], yi[0], zi[0], xj[0], yj[0], zj[0], cell[offcnt]);
-
-            if ( dst >= rstart )
-              rndx = (int) floor ( ( dst - rstart ) / dr );
-            else
-              rndx = 0;
-
-            if ( rndx >= rnum )
-              continue;
-
-            if ( (chg[i] > 0) && (chg[j] > 0) )
-              add_array_number_inplace ( asub(nrm_catcat, nlns, rndx, 0), 1., 1, nlns_tmp );
-            else if ( (chg[i] < 0) && (chg[j] < 0) )
-              add_array_number_inplace ( asub(nrm_aniani, nlns, rndx, 0), 1., 1, nlns_tmp );
-            else
-              add_array_number_inplace ( asub(nrm_anicat, nlns, rndx, 0), 1., 1, nlns_tmp );
-
-          }
-          else
-            rndx = 0;
-
-          double *ptr_cc = asub(cnd_cc, nlns, rndx, 0);
-          double *ptr_ac = asub(cnd_ac, nlns, rndx, 0);
-          double *ptr_aa = asub(cnd_aa, nlns, rndx, 0);
-
-          if ( (chg[i] > 0) && (chg[j] > 0) )
-            add_arrays_inplace ( ptr_cc, tmp, 1, nlns_tmp );
-          else if ( (chg[i] < 0) && (chg[j] < 0) )
-            add_arrays_inplace ( ptr_aa, tmp, 1, nlns_tmp );
-          else
-            add_arrays_inplace ( ptr_ac, tmp, 1, nlns_tmp );
-
+          ael(cnd_ac, rnum, j, i) += dot;
+          ael(nrm_ac, rnum, j, i) += 1.;
         }
+
       }
+
     }
 
-    printf(" %i / %i \r", (n+1), nrestart);
+    printf(" %i / %i \r", (n+1), nlns);
     fflush(stdout);
 
   }
   printf("\n");
 
-  double *ptr_nrm_ne;
-  double *ptr_nrm_cc;
-  double *ptr_nrm_ac;
-  double *ptr_nrm_aa;
-
-  if ( rnum > 1 ) {
-    ptr_nrm_ne = nrm;
-    ptr_nrm_cc = nrm_catcat;
-    ptr_nrm_ac = nrm_anicat;
-    ptr_nrm_aa = nrm_aniani;
-
-  }
-  else {
-    ptr_nrm_ne = nrm;
-    ptr_nrm_cc = nrm;
-    ptr_nrm_ac = nrm;
-    ptr_nrm_aa = nrm;
-  }
-
   //FUDO| division needs to be done for all array elements
   //FUDO| problemativ if nrm == 0 somewhere, which is not unlikely
-  divide_array_array_inplace ( neinst, ptr_nrm_ne, 1, nlns );
-  divide_array_array_inplace ( cnd_cc, ptr_nrm_cc, 1, nlns*rnum );
-  divide_array_array_inplace ( cnd_ac, ptr_nrm_ac, 1, nlns*rnum );
-  divide_array_array_inplace ( cnd_aa, ptr_nrm_aa, 1, nlns*rnum );
+  divide_array_array_inplace ( cnd_cc, nrm_cc, 1, rnum );
+  divide_array_array_inplace ( cnd_ac, nrm_ac, 1, rnum );
+  divide_array_array_inplace ( cnd_aa, nrm_aa, 1, rnum );
 
 #ifdef DEBUG
-  write_array_to_file ( "norm_neinst.out", ptr_nrm_ne, 1, nlns );
-  write_array_to_file ( "norm_catcat.out", ptr_nrm_cc, rnum, nlns );
-  write_array_to_file ( "norm_anicat.out", ptr_nrm_ac, rnum, nlns );
-  write_array_to_file ( "norm_aniani.out", ptr_nrm_aa, rnum, nlns );
 #endif
 
   // free (nrm_neinst);
-  free (nrm_catcat);
-  free (nrm_anicat);
-  free (nrm_aniani);
+  free (nrm_cc);
+  free (nrm_ac);
+  free (nrm_aa);
 
-  free (tmp);
-  free (nrm);
+  free ( vx );
+  free ( vy );
+  free ( vz );
 
-  // free (msd);
 }
