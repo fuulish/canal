@@ -55,7 +55,7 @@ void calculate_velocities ( double *vx, double *vy, double *vz, double *xi, doub
   ptr_b = &(xi[0]);
 
   subtract_array_array ( ptr_v, ptr_a, ptr_b, 1, nlns-2 );
-  divide_array_number_inplace ( ptr_v, 2.*timestep, 1, nlns );
+  divide_array_number_inplace ( ptr_v, 2.*timestep, 1, nlns-1 );
 
   vx[0] = ( xi[1] - xi[0] ) / timestep;
   vx[nlns-1] = ( xi[nlns-1] - xi[nlns-2] ) / timestep;
@@ -66,7 +66,7 @@ void calculate_velocities ( double *vx, double *vy, double *vz, double *xi, doub
   ptr_b = &(yi[0]);
 
   subtract_array_array ( ptr_v, ptr_a, ptr_b, 1, nlns-2 );
-  divide_array_number_inplace ( ptr_v, 2.*timestep, 1, nlns );
+  divide_array_number_inplace ( ptr_v, 2.*timestep, 1, nlns-1 );
 
   vy[0] = ( yi[1] - yi[0] ) / timestep;
   vy[nlns-1] = ( yi[nlns-1] - yi[nlns-2] ) / timestep;
@@ -77,7 +77,7 @@ void calculate_velocities ( double *vx, double *vy, double *vz, double *xi, doub
   ptr_b = &(zi[0]);
 
   subtract_array_array ( ptr_v, ptr_a, ptr_b, 1, nlns-2 );
-  divide_array_number_inplace ( ptr_v, 2.*timestep, 1, nlns );
+  divide_array_number_inplace ( ptr_v, 2.*timestep, 1, nlns-1 );
 
   vz[0] = ( zi[1] - zi[0] ) / timestep;
   vz[nlns-1] = ( zi[nlns-1] - zi[nlns-2] ) / timestep;
@@ -95,6 +95,8 @@ void get_vflux_locl ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
   double *ptr_vxi, *ptr_vyi, *ptr_vzi, *ptr_vxj, *ptr_vyj, *ptr_vzj;
   double *xi, *yi, *zi, *xj, *yj, *zj;
 
+  double scale;
+
   int arrlen;
 
   //FUDO| each array has nlns time entries, and ncol molecule entries
@@ -105,13 +107,17 @@ void get_vflux_locl ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
   vz = (double *) malloc(arrlen * sizeof(double));
 
   //FUDO| need to transform x,y,z data to vx,vy,vz data
-  calculate_velocities ( vx, vy, vz, x, y, z, arrlen, timestep );
+  //FUDO| we need to this with respect to each ncol subarrays, otherwise we're using the beginning and ending of the wrong timeseries/molecues
+
+  for ( n=0; n<ncol; n++)
+    calculate_velocities ( asub(vx, nlns, n, 0), asub(vy, nlns, n, 0), asub(vz, nlns, n, 0), asub(x, nlns, n, 0), asub(y, nlns, n, 0), asub(z, nlns, n, 0), nlns, timestep );
 
   int nrmlen;
 
   //FUDO| for each kind of correlation only a distance dependence, we will average over all molecules/kinds
   nrmlen = rnum;
 
+  double  *nrm_ne = calloc(nrmlen, sizeof(double));
   double  *nrm_cc = calloc(nrmlen, sizeof(double));
   double  *nrm_ac = calloc(nrmlen, sizeof(double));
   double  *nrm_aa = calloc(nrmlen, sizeof(double));
@@ -127,6 +133,11 @@ void get_vflux_locl ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
 
     for ( i=0; i<ncol; i++ ) {
       for ( j=i; j<ncol; j++ ) {
+
+        if ( i == j )
+          scale = 1.;
+        else
+          scale = 2.;
 
         ptr_vxi = asub(vx, nlns, i, n);
         ptr_vyi = asub(vy, nlns, i, n);
@@ -161,26 +172,23 @@ void get_vflux_locl ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
         if ( rndx >= rnum )
           continue;
 
-        if ( (chg[i] > 0) && (chg[j] > 0) ) {
-          ael(cnd_cc, rnum, i, j) += dot;
-          ael(nrm_cc, rnum, i, j) += 1.;
-
-          ael(cnd_cc, rnum, j, i) += dot;
-          ael(nrm_cc, rnum, j, i) += 1.;
-        }
-        else if ( (chg[i] < 0) && (chg[j] < 0) ) {
-          ael(cnd_aa, rnum, i, j) += dot;
-          ael(nrm_aa, rnum, i, j) += 1.;
-
-          ael(cnd_aa, rnum, j, i) += dot;
-          ael(nrm_aa, rnum, j, i) += 1.;
+        if ( i == j ) {
+          neinst[rndx] += dot*scale;
+          nrm_ne[rndx] += scale;
         }
         else {
-          ael(cnd_ac, rnum, i, j) += dot;
-          ael(nrm_ac, rnum, i, j) += 1.;
-
-          ael(cnd_ac, rnum, j, i) += dot;
-          ael(nrm_ac, rnum, j, i) += 1.;
+          if ( (chg[i] > 0) && (chg[j] > 0) ) {
+            cnd_cc[rndx] += dot*scale;
+            nrm_cc[rndx] += scale;
+          }
+          else if ( (chg[i] < 0) && (chg[j] < 0) ) {
+            cnd_aa[rndx] += dot*scale;
+            nrm_aa[rndx] += scale;
+          }
+          else {
+            cnd_ac[rndx] += dot*scale;
+            nrm_ac[rndx] += scale;
+          }
         }
 
       }
@@ -195,6 +203,8 @@ void get_vflux_locl ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
 
   //FUDO| division needs to be done for all array elements
   //FUDO| problemativ if nrm == 0 somewhere, which is not unlikely
+
+  divide_array_array_inplace ( neinst, nrm_ne, 1, rnum );
   divide_array_array_inplace ( cnd_cc, nrm_cc, 1, rnum );
   divide_array_array_inplace ( cnd_ac, nrm_ac, 1, rnum );
   divide_array_array_inplace ( cnd_aa, nrm_aa, 1, rnum );
@@ -203,6 +213,7 @@ void get_vflux_locl ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
 #endif
 
   // free (nrm_neinst);
+  free (nrm_ne);
   free (nrm_cc);
   free (nrm_ac);
   free (nrm_aa);

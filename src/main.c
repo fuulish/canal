@@ -5,6 +5,7 @@
 #include "io.h"
 #include "macros.h"
 #include "msd.h"
+#include "vel.h"
 #include "constants.h"
 
 int main(int argc, char *argv[]) {
@@ -12,7 +13,7 @@ int main(int argc, char *argv[]) {
   int ncol, nlns;
   int qcol, nchg;
   int ccol, ncll;
-  char *delim = " ";
+  char delim[2] = " ";
 
   int nrestart = 1;
   double avvol = 1.;
@@ -23,6 +24,7 @@ int main(int argc, char *argv[]) {
   int rnum = 1;
   double rstart = 5.;
   double dr = 2.;
+  int task = NTTN;
 
   char xcom_fn[100];
   char ycom_fn[100];
@@ -32,7 +34,9 @@ int main(int argc, char *argv[]) {
   char cell_fn[100];
 
   if ( argc > 1 )
-    read_input( argv[1], &nrestart, &avvol, &temp, &timestep, &split, &spatial, &rnum, &rstart, &dr, xcom_fn, ycom_fn, zcom_fn, chgs_fn, cell_fn );
+    read_input( argv[1], &nrestart, &avvol, &temp, &timestep, &split, &spatial, &rnum, &rstart, &dr, xcom_fn, ycom_fn, zcom_fn, chgs_fn, cell_fn, &task );
+  else
+    print_error ( INCOMPLETE_INPUT, "Input file is missing", __FILE__, __LINE__ );
 
   double *xcom, *ycom, *zcom, *chgs, *cell;
 
@@ -70,40 +74,74 @@ int main(int argc, char *argv[]) {
   }
   */
 
-  if ( split ) {
+  switch ( task ) {
+    case COND:
+      {
 
-    int arrlen = nlns * rnum;
+      if ( split ) {
 
-    double *qflux_neinst = (double *) calloc ( arrlen, sizeof(double));
-    double *qflux_catcat = (double *) calloc ( arrlen, sizeof(double));
-    double *qflux_anicat = (double *) calloc ( arrlen, sizeof(double));
-    double *qflux_aniani = (double *) calloc ( arrlen, sizeof(double));
+        int arrlen = nlns * rnum;
 
-    get_qflux_srtd ( qflux_neinst, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, nrestart, dr, rstart, rnum, cell );
-    // get_qflux_srtd ( qflux_neinst, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, nrestart);
+        double *qflux_neinst = (double *) calloc ( arrlen, sizeof(double));
+        double *qflux_catcat = (double *) calloc ( arrlen, sizeof(double));
+        double *qflux_anicat = (double *) calloc ( arrlen, sizeof(double));
+        double *qflux_aniani = (double *) calloc ( arrlen, sizeof(double));
 
-    write_array_to_file ( "cond_neinst.out", qflux_neinst, 1, nlns );
-    write_array_to_file ( "cond_catcat.out", qflux_catcat, rnum, nlns );
-    write_array_to_file ( "cond_anicat.out", qflux_anicat, rnum, nlns );
-    write_array_to_file ( "cond_aniani.out", qflux_aniani, rnum, nlns );
+        get_qflux_srtd ( qflux_neinst, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, nrestart, dr, rstart, rnum, cell );
+        // get_qflux_srtd ( qflux_neinst, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, nrestart);
 
-    printf("NUMBER OF COLUMNS: %i AND NUMBER OF LINES: %i\n", ncol, nlns);
+        write_array_to_file ( "cond_neinst.out", qflux_neinst, 1, nlns );
+        write_array_to_file ( "cond_catcat.out", qflux_catcat, rnum, nlns );
+        write_array_to_file ( "cond_anicat.out", qflux_anicat, rnum, nlns );
+        write_array_to_file ( "cond_aniani.out", qflux_aniani, rnum, nlns );
 
-    free ( qflux_neinst );
-    free ( qflux_catcat );
-    free ( qflux_anicat );
-    free ( qflux_aniani );
-  }
-  else {
-    double *qflux = (double *) calloc ( nlns, sizeof(double));
+        printf("NUMBER OF COLUMNS: %i AND NUMBER OF LINES: %i\n", ncol, nlns);
 
-    get_qflux ( qflux, xcom, ycom, zcom, chgs, ncol, nlns, nrestart);
+        free ( qflux_neinst );
+        free ( qflux_catcat );
+        free ( qflux_anicat );
+        free ( qflux_aniani );
+      }
+      else {
+        double *qflux = (double *) calloc ( nlns, sizeof(double));
 
-    write_array_to_file ( "cond_all.out", qflux, 1, nlns );
+        get_qflux ( qflux, xcom, ycom, zcom, chgs, ncol, nlns, nrestart);
 
-    printf("NUMBER OF COLUMNS: %i AND NUMBER OF LINES: %i\n", ncol, nlns);
+        write_array_to_file ( "cond_all.out", qflux, 1, nlns );
 
-    free ( qflux );
+        printf("NUMBER OF COLUMNS: %i AND NUMBER OF LINES: %i\n", ncol, nlns);
+
+        free ( qflux );
+      }
+
+      }
+      break;
+    case VELP:
+      {
+      int arrlen = rnum;
+
+      double *qflux_neinst = (double *) calloc ( arrlen, sizeof(double));
+      double *qflux_catcat = (double *) calloc ( arrlen, sizeof(double));
+      double *qflux_anicat = (double *) calloc ( arrlen, sizeof(double));
+      double *qflux_aniani = (double *) calloc ( arrlen, sizeof(double));
+
+      get_vflux_locl ( qflux_neinst, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, nrestart, dr, rstart, rnum, cell, timestep );
+
+      write_array_to_file ( "cond_neinst.out", qflux_neinst, 1, rnum );
+      write_array_to_file ( "cond_catcat.out", qflux_catcat, 1, rnum );
+      write_array_to_file ( "cond_anicat.out", qflux_anicat, 1, rnum );
+      write_array_to_file ( "cond_aniani.out", qflux_aniani, 1, rnum );
+
+      printf("NUMBER OF COLUMNS: %i AND NUMBER OF LINES: %i\n", ncol, nlns);
+
+      free ( qflux_neinst );
+      free ( qflux_catcat );
+      free ( qflux_anicat );
+      free ( qflux_aniani );
+      }
+      break;
+    default:
+      break;
   }
 
   free ( cell );

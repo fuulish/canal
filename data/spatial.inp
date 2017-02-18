@@ -9,3 +9,4 @@ ycom = ../data/ycom.dat
 zcom = ../data/zcom.dat
 cell = ../data/cell.dat
 chgs = ../data/charges.dat
+task = cond

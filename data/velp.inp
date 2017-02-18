@@ -1,12 +1,12 @@
 nrestart = 10
-spatial = 10 5. 2.
+spatial = 30 5. 2.
 temp =  349.954
 avvol = 135915
 timestep = 50000
-split = 0
+split = 1
 xcom = ../data/xcom.dat
 ycom = ../data/ycom.dat
 zcom = ../data/zcom.dat
 cell = ../data/cell.dat
 chgs = ../data/charges.dat
-task = cond
+task = velp

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include "errors.h"
 #include "io.h"
 #include "macros.h"
@@ -108,7 +109,7 @@ void write_array_to_file ( char *fname, double *a, int ncol, int nlns )
   }
 }
 
-void read_input( char *fname, int *nrestart, double *avvol, double *temp, double *timestep, int *split, int *spatial, int *rnum, double *rstart, double *dr, char *xcom_fn, char *ycom_fn, char *zcom_fn, char *chgs_fn, char *cell_fn )
+void read_input( char *fname, int *nrestart, double *avvol, double *temp, double *timestep, int *split, int *spatial, int *rnum, double *rstart, double *dr, char *xcom_fn, char *ycom_fn, char *zcom_fn, char *chgs_fn, char *cell_fn, int *task )
 {
     FILE *datei;
     char *txt;
@@ -119,7 +120,7 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
 
     enum varset_e
     {
-      NRESTART = 1,
+      NRESTART = INT_MIN,
       AVVOL,
       TEMP,
       TIMESTEP,
@@ -130,6 +131,7 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
       ZCOM,
       CHGS,
       CELL,
+      TASK,
     };
 
     int def_nrestart = NRESTART;
@@ -143,6 +145,7 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
     int def_zcom = ZCOM;
     int def_chgs = CHGS;
     int def_cell = CELL;
+    int def_task = TASK;
 
     datei = fopen(fname, "r");
 
@@ -225,6 +228,15 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
         strcpy ( cell_fn, buf );
         def_cell = 0;
       }
+      else if ( strstr(variable, "task") != NULL )
+      {
+        if ( strstr ( value, "cond" ) != NULL )
+          *task = COND;
+        else if ( strstr ( value, "velp" ) != NULL )
+          *task = VELP;
+
+        def_task = 0;
+      }
     }
 
     if ( def_nrestart == NRESTART )
@@ -259,6 +271,9 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
 
     if ( def_cell == CELL )
       print_error ( INCOMPLETE_INPUT, "CELL file is missing", __FILE__, __LINE__);
+
+    if ( def_task == TASK )
+      print_error ( INCOMPLETE_INPUT, "TASK is missing", __FILE__, __LINE__);
 
     fclose(datei);
     free(txt);
