@@ -20,9 +20,9 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 $(ODIR)/%.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-all: $(ODIR) anal
+all: $(ODIR) canal
 
-anal: $(OBJ)
+canal: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 $(ODIR):
@@ -34,29 +34,29 @@ clean:
 	rm -f $(ODIR)/*.o *~ core $(INCDIR)/*~
 
 distclean: clean
-	rm -rf $(ODIR) anal *.out
+	rm -rf $(ODIR) canal *.out
 
 #_INP = normal split spatial
 #INP = $(patsubst %,$(DDIR)/%, $(_INP))
 #
 #tests:
-#	./anal $@
+#	./canal $@
 
 tests: normal split spatial
 
 normal:
-	./anal ../data/normal.inp
+	./canal ../data/normal.inp
 	diff cond_all.out ../refs/cond_all.dat
 
 split:
-	./anal ../data/split.inp
+	./canal ../data/split.inp
 	diff cond_neinst.out ../refs/cond_neinst.dat
 	diff cond_catcat.out ../refs/cond_catcat.dat
 	diff cond_anicat.out ../refs/cond_anicat.dat
 	diff cond_aniani.out ../refs/cond_aniani.dat
 
 spatial:
-	./anal ../data/spatial.inp
+	./canal ../data/spatial.inp
 	diff cond_neinst.out ../refs/cond_neinst_spatial.dat
 	diff cond_catcat.out ../refs/cond_catcat_spatial.dat
 	diff cond_anicat.out ../refs/cond_anicat_spatial.dat
