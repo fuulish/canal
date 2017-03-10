@@ -1,5 +1,7 @@
 #include "linreg.h"
 #include "constants.h"
+#include "tools.h"
+#include "io.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>                           /* math functions                */
@@ -73,5 +75,12 @@ void get_linear_regression ( double *data, int len, double temp, double vol, dou
   cond2 = m2 / (6. * vol * KBOLTZ * temp );
   cond2 *= E2C*E2C / A2M / FS2S;
 
-  printf("CONDDUCTIVITY IS: %14.8f +/- %14.8f S/m\n", cond, fabsf(cond2-cond1));
+  printf("FIT PARAMETER: %14.8f %14.8f\n", m, b);
+  printf("CONDUCTIVITY IS: %14.8f +/- %14.8f S/m\n", cond, fabsf(cond2-cond1));
+
+#ifdef DEBUG
+  multiply_array_number_inplace ( time, m, 1, len );
+  add_array_number_inplace ( time, b, 1, len );
+  write_array_to_file ( "fit_cond.out", time, 1, len );
+#endif
 }
