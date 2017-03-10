@@ -108,7 +108,7 @@ void write_array_to_file ( char *fname, double *a, int ncol, int nlns )
   }
 }
 
-void read_input( char *fname, int *nrestart, double *avvol, double *temp, double *timestep, int *split, int *spatial, int *rnum, double *rstart, double *dr, char *xcom_fn, char *ycom_fn, char *zcom_fn, char *chgs_fn, char *cell_fn )
+void read_input( char *fname, int *nrestart, double *avvol, double *temp, double *timestep, int *split, int *spatial, int *rnum, double *rstart, double *dr, char *xcom_fn, char *ycom_fn, char *zcom_fn, char *chgs_fn, char *cell_fn, double *fitoffset, double *fitlength )
 {
     FILE *datei;
     char *txt;
@@ -130,6 +130,8 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
       ZCOM,
       CHGS,
       CELL,
+      FITOFFSET,
+      FITLENGTH,
     };
 
     int def_nrestart = NRESTART;
@@ -143,6 +145,8 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
     int def_zcom = ZCOM;
     int def_chgs = CHGS;
     int def_cell = CELL;
+    int def_fitoffset = FITOFFSET;
+    int def_fitlength = FITLENGTH;
 
     datei = fopen(fname, "r");
 
@@ -188,6 +192,12 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
         buf = strtok (value, " ");
         *rnum = atoi(buf);
 
+        if ( (*rnum == 0) || (*rnum == 1) ) {
+          *rnum = 1;
+          *spatial = 0;
+          continue;
+        }
+
         buf = strtok (NULL, " ");
         *rstart = atof(buf);
 
@@ -225,6 +235,18 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
         strcpy ( cell_fn, buf );
         def_cell = 0;
       }
+      else if ( strstr(variable, "fitoffset" ) != NULL )
+      {
+        buf = strtok (value, " \n");
+        *fitoffset = atof(buf);
+        def_fitoffset = 0;
+      }
+      else if ( strstr(variable, "fitlength" ) != NULL )
+      {
+        buf = strtok (value, " \n");
+        *fitlength = atof(buf);
+        def_fitlength = 0;
+      }
     }
 
     if ( def_nrestart == NRESTART )
@@ -259,6 +281,12 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
 
     if ( def_cell == CELL )
       print_error ( INCOMPLETE_INPUT, "CELL file is missing", __FILE__, __LINE__);
+
+    if ( def_cell == FITOFFSET )
+      print_error ( INCOMPLETE_INPUT, "FITOFFSET file is missing", __FILE__, __LINE__);
+
+    if ( def_cell == FITLENGTH )
+      print_error ( INCOMPLETE_INPUT, "FITLENGTH file is missing", __FILE__, __LINE__);
 
     fclose(datei);
     free(txt);

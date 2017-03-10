@@ -1,4 +1,5 @@
 #include "linreg.h"
+#include "constants.h"
 #include <stdlib.h>
 #include <math.h>                           /* math functions                */
 
@@ -42,4 +43,34 @@ int linreg(int n, const REAL x[], const REAL y[], REAL* m, REAL* b, REAL* r)
   }
 
    return 0;
+}
+
+void get_linear_regression ( double *data, int len, double temp, double vol, double timestep )
+{
+  int i;
+  double m, b, r, cond;
+
+  double *time = (double *) malloc(len * sizeof(double));
+  for ( i=0; i<len; i++ )
+    time[i] = i*timestep;
+
+  linreg(len, time, data, &m, &b, &r);
+
+  cond = m / (6. * vol * KBOLTZ * temp );
+  cond *= E2C*E2C / A2M / FS2S;
+
+  double m1, b1, r1, cond1;
+  int hlen = len/2;
+  linreg(hlen, time, data, &m1, &b1, &r1);
+
+  cond1 = m1 / (6. * vol * KBOLTZ * temp );
+  cond1 *= E2C*E2C / A2M / FS2S;
+
+  double m2, b2, r2, cond2;
+  linreg(hlen, &(time[hlen]), &(data[hlen]), &m2, &b2, &r2);
+
+  cond2 = m2 / (6. * vol * KBOLTZ * temp );
+  cond2 *= E2C*E2C / A2M / FS2S;
+
+  printf("CONDDUCTIVITY IS: %14.8f +/- %14.8f S/m\n", cond, fabsf(cond2-cond1));
 }

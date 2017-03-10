@@ -6,6 +6,7 @@
 #include "macros.h"
 #include "msd.h"
 #include "constants.h"
+#include "linreg.h"
 
 int main(int argc, char *argv[]) {
 
@@ -23,6 +24,8 @@ int main(int argc, char *argv[]) {
   int rnum = 1;
   double rstart = 5.;
   double dr = 2.;
+  double fitoffset = 0.1;
+  double fitlength = 0.9;
 
   char xcom_fn[100];
   char ycom_fn[100];
@@ -32,7 +35,7 @@ int main(int argc, char *argv[]) {
   char cell_fn[100];
 
   if ( argc > 1 )
-    read_input( argv[1], &nrestart, &avvol, &temp, &timestep, &split, &spatial, &rnum, &rstart, &dr, xcom_fn, ycom_fn, zcom_fn, chgs_fn, cell_fn );
+    read_input( argv[1], &nrestart, &avvol, &temp, &timestep, &split, &spatial, &rnum, &rstart, &dr, xcom_fn, ycom_fn, zcom_fn, chgs_fn, cell_fn, &fitoffset, &fitlength );
 
   double *xcom, *ycom, *zcom, *chgs, *cell;
 
@@ -48,18 +51,21 @@ int main(int argc, char *argv[]) {
   analyze_file ( chgs_fn, &qcol, &nchg, delim );
   chgs = read_file_double ( chgs_fn, nchg, qcol, delim );
 
-  analyze_file ( cell_fn, &ccol, &ncll, delim );
-  cell = read_file_double ( cell_fn, ncll, ccol, delim );
-
   printf("NCHGS: %i, NCOL: %i\n", nchg, ncol);
   if ( nchg != ncol ) {
     print_error ( FATAL, "Dimensions of charge array and position data don't match", __FILE__, __LINE__ );
     return FATAL;
   }
 
-  if ( ncll != nlns ) {
-    print_error ( FATAL, "Dimensions of cell array and position data don't match", __FILE__, __LINE__ );
-    return FATAL;
+  if ( rnum > 1 ) {
+
+    analyze_file ( cell_fn, &ccol, &ncll, delim );
+    cell = read_file_double ( cell_fn, ncll, ccol, delim );
+
+    if ( ncll != nlns ) {
+      print_error ( FATAL, "Dimensions of cell array and position data don't match", __FILE__, __LINE__ );
+      return FATAL;
+    }
   }
 
   /* data I looks fine
@@ -89,6 +95,19 @@ int main(int argc, char *argv[]) {
 
     printf("NUMBER OF COLUMNS: %i AND NUMBER OF LINES: %i\n", ncol, nlns);
 
+    int fitstrt, nlns_fit;
+    fitstrt = fitoffset * nlns;
+    nlns_fit = fitlength * nlns;
+
+    printf("NEINST: ");
+    get_linear_regression(&(qflux_neinst[fitstrt]), nlns_fit, temp, avvol, timestep);
+    printf("CATCAT: ");
+    get_linear_regression(&(qflux_catcat[fitstrt]), nlns_fit, temp, avvol, timestep);
+    printf("ANIANI: ");
+    get_linear_regression(&(qflux_aniani[fitstrt]), nlns_fit, temp, avvol, timestep);
+    printf("ANICAT: ");
+    get_linear_regression(&(qflux_anicat[fitstrt]), nlns_fit, temp, avvol, timestep);
+
     free ( qflux_neinst );
     free ( qflux_catcat );
     free ( qflux_anicat );
@@ -99,6 +118,13 @@ int main(int argc, char *argv[]) {
 
     get_qflux ( qflux, xcom, ycom, zcom, chgs, ncol, nlns, nrestart);
 
+    int fitstrt, nlns_fit;
+    fitstrt = fitoffset * nlns;
+    nlns_fit = fitlength * nlns;
+
+    printf("FULL: ");
+    get_linear_regression(&(qflux[fitstrt]), nlns_fit, temp, avvol, timestep);
+
     write_array_to_file ( "cond_all.out", qflux, 1, nlns );
 
     printf("NUMBER OF COLUMNS: %i AND NUMBER OF LINES: %i\n", ncol, nlns);
@@ -106,7 +132,8 @@ int main(int argc, char *argv[]) {
     free ( qflux );
   }
 
-  free ( cell );
+  if ( rnum > 1 )
+    free ( cell );
 
   free ( xcom );
   free ( ycom );
