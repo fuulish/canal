@@ -282,11 +282,11 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
     if ( def_cell == CELL )
       print_error ( INCOMPLETE_INPUT, "CELL file is missing", __FILE__, __LINE__);
 
-    if ( def_cell == FITOFFSET )
-      print_error ( INCOMPLETE_INPUT, "FITOFFSET file is missing", __FILE__, __LINE__);
+    if ( def_fitoffset == FITOFFSET )
+      print_warning ( YOU_KNOW_WHAT, "Using defaults for FITOFFSET");
 
-    if ( def_cell == FITLENGTH )
-      print_error ( INCOMPLETE_INPUT, "FITLENGTH file is missing", __FILE__, __LINE__);
+    if ( def_fitlength == FITLENGTH )
+      print_warning ( YOU_KNOW_WHAT, "Using defaults for FITLENGTH");
 
     fclose(datei);
     free(txt);

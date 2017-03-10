@@ -57,6 +57,7 @@ int main(int argc, char *argv[]) {
     return FATAL;
   }
 
+  //FUDO| this needs fixing, cell allocation below only to avoid issues with maybe-unitialized warning
   if ( rnum > 1 ) {
 
     analyze_file ( cell_fn, &ccol, &ncll, delim );
@@ -66,6 +67,9 @@ int main(int argc, char *argv[]) {
       print_error ( FATAL, "Dimensions of cell array and position data don't match", __FILE__, __LINE__ );
       return FATAL;
     }
+  }
+  else {
+    cell = (double *) calloc ( nlns, sizeof (double));
   }
 
   /* data I looks fine
@@ -132,8 +136,7 @@ int main(int argc, char *argv[]) {
     free ( qflux );
   }
 
-  if ( rnum > 1 )
-    free ( cell );
+  free ( cell );
 
   free ( xcom );
   free ( ycom );

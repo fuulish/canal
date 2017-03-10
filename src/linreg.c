@@ -1,6 +1,7 @@
 #include "linreg.h"
 #include "constants.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <math.h>                           /* math functions                */
 
 inline static REAL sqr(REAL x) {
