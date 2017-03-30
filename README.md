@@ -5,14 +5,13 @@ program to calculate electrical conductivity from molecular simulations using ro
 this is similar to what has been described here:
     http://aip.scitation.org/doi/abs/10.1063/1.4890741
 
-    who, to the best of my knowledge, were the first ones who did a spatial decomposition analysis of the electrical conductivity
+Those guys were, to the best of my knowledge, the first ones who did a spatial decomposition analysis of the electrical conductivity
+There is not much documentation. The directory data contains three example inputs that cover what is possible with canal at the moment
 
 # Compilation
 
 All necessary files are in the src subdirectory, including a makefile that might need changing depending on what compiler you prefer
 For gcc you should be fine by simple typing make.
-
-There is not much documentation. The directory data contains three example inputs that cover what is possible with canal at the moment
 
 # input options
 
