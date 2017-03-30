@@ -1,6 +1,6 @@
 # canal
 
-Calculate electrical conductivity from molecular simulations using root-mean square displacements and optionally splits it into contributions
+Calculates electrical conductivity from molecular simulations using root-mean square displacements and optionally splits it into contributions
 from the individual species, and/or decomposes it spatially.
 
 This is similar to what has been described here:
