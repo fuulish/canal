@@ -16,6 +16,14 @@ For gcc you should be fine by simple typing make.
 
 # Input options
 
+You need to create an input file that contains a couple of keywords and values in the style:
+
+    keyword = value1 value2
+
+The location of the input file has to be passed as first command-line argument.
+
+All keywords only take one value, except for 'spatial', which takes one to three values.
+The keywords are:
 
     mandatory:
         - xcom/ycom/zcom:   x,y,z coordinate files for all fragments' centers of mass (in Angstrom)
