@@ -1,8 +1,9 @@
 # canal
 
-program to calculate electrical conductivity from molecular simulations using root-mean square displacments
+Calculate electrical conductivity from molecular simulations using root-mean square displacements and optionally splits it into contributions
+from the individual species, and/or decomposes it spatially.
 
-this is similar to what has been described here:
+This is similar to what has been described here:
     http://aip.scitation.org/doi/abs/10.1063/1.4890741
 
 Those guys were, to the best of my knowledge, the first ones who did a spatial decomposition analysis of the electrical conductivity.
