@@ -5,7 +5,8 @@ program to calculate electrical conductivity from molecular simulations using ro
 this is similar to what has been described here:
     http://aip.scitation.org/doi/abs/10.1063/1.4890741
 
-Those guys were, to the best of my knowledge, the first ones who did a spatial decomposition analysis of the electrical conductivity
+Those guys were, to the best of my knowledge, the first ones who did a spatial decomposition analysis of the electrical conductivity.
+
 There is not much documentation. The directory data contains three example inputs that cover what is possible with canal at the moment
 
 # Compilation
