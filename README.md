@@ -38,7 +38,7 @@ The keywords are:
         needed for correct conductivty calculation:
             - temp:         temperature (in K)
             - timestep:     timestep (in fs)
-            - avvol:        average volume
+            - avvol:        average volume (in Angstrom^3)
 
         needed for splitting conductivity into parts from anion-anion, anion-cation, cation-cation:
             - split         1 number, turned on if != 0
