@@ -1,5 +1,6 @@
 IDIR =../include
 CC = gcc
+#CC = clang
 COMPILER_FLAGS = -Wall -g -O3 -march=native -mpc64  -fno-exceptions -ffast-math -funroll-loops -fstrict-aliasing -finline-functions
 #COMPILER_FLAGS = -Wall -g -O2 -march=native -mpc64  -fno-exceptions -funroll-loops -fstrict-aliasing -finline-functions
 DFLAGS = -DDEBUG
@@ -9,7 +10,7 @@ ODIR = obj
 LDIR =../lib
 DDIR = ../data
 
-LIBS = -lm
+LIBS = -lm -lgsl -lgslcblas
 
 _DEPS = errors.h io.h tools.h mol.h msd.h linreg.h constants.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))

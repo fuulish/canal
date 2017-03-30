@@ -19,5 +19,7 @@ You should have received a copy of the GNU General Public License
 along with canal.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-int linear_regression(int n, const double x[], const double y[], double* m, double* b, double* r);
-void get_linear_regression ( double *data, int len, double temp, double vol, double timestep );
+#include <stddef.h>
+
+int linear_regression(size_t n, const double x[], const double y[], double* m, double* b, double* r);
+void get_linear_regression ( double *data, size_t len, double temp, double vol, double timestep );

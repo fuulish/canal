@@ -26,43 +26,21 @@ along with canal.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <gsl/gsl_fit.h>
 
-int linear_regression(int n, const double x[], const double y[], double* m, double* b, double* r)
+int linear_regression(size_t n, const double x[], const double y[], double* m, double* b, double* r)
 {
-  double sum_x = 0.0;
-  double sum_x2 = 0.0;
-  double sum_xy = 0.0;
-  double sum_y = 0.0;
-  double sum_y2 = 0.0;
+  size_t xstride = 1;
+  size_t ystride = 1;
 
-  int i;
-  for ( i=0; i<n ; ++i) {
-    sum_x  += x[i];
-    sum_x2 += x[i] * x[i];
-    sum_xy += x[i] * y[i];
-    sum_y  += y[i];
-    sum_y2 += y[i] * y[i];
-  }
+  double cov00, cov01, cov11, sumsq;
 
-  double denom = (n * sum_x2 - sum_x * sum_x);
-  if (denom == 0) {
-    // singular matrix. can't solve the problem.
-    *m = 0;
-    *b = 0;
-    if ( r != NULL ) *r = 0;
-    return 1;
-  }
+  int ret = gsl_fit_linear (x, xstride, y, ystride, n, b, m, &cov00, &cov01, &cov11, &sumsq);
 
-  *m = (n * sum_xy  -  sum_x * sum_y) / denom;
-  *b = (sum_y * sum_x2  -  sum_x * sum_xy) / denom;
-
-  if ( r != NULL )
-    *r = (sum_xy - sum_x * sum_y / n) / sqrt((sum_x2 - sum_x * sum_x / n) * (sum_y2 - sum_y * sum_y / n));
-
-   return 0;
+  return ret;
 }
 
-void get_linear_regression ( double *data, int len, double temp, double vol, double timestep )
+void get_linear_regression ( double *data, size_t len, double temp, double vol, double timestep )
 {
   int i;
   double m, b, r, cond;
@@ -90,7 +68,7 @@ void get_linear_regression ( double *data, int len, double temp, double vol, dou
   cond2 *= E2C*E2C / A2M / FS2S;
 
   printf("FIT PARAMETER: %14.8f %14.8f\n", m, b);
-  printf("CONDUCTIVITY IS: %14.8f +/- %14.8f S/m\n", cond, fabsf(cond2-cond1));
+  printf("CONDUCTIVITY IS: %14.8f +/- %14.8f S/m\n", cond, fabs(cond2-cond1));
 
 #ifdef DEBUG
   multiply_array_number_inplace ( time, m, 1, len );
