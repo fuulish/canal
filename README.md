@@ -14,9 +14,9 @@ There is not much documentation. The directory data contains three example input
 All necessary files are in the src subdirectory, including a makefile that might need changing depending on what compiler you prefer
 For gcc you should be fine by simple typing make.
 
-# input options
+# Input options
 
-input needed:
+
     mandatory:
         - xcom/ycom/zcom:   x,y,z coordinate files for all fragments' centers of mass (in Angstrom)
                             the format is one line per snapshot, with values for each fragment separated by spaces

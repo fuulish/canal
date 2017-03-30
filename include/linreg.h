@@ -21,5 +21,5 @@ along with canal.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stddef.h>
 
-int linear_regression(size_t n, const double x[], const double y[], double* m, double* b, double* r);
-void get_linear_regression ( double *data, size_t len, double temp, double vol, double timestep );
+int get_linear_regression(size_t n, const double x[], const double y[], double* m, double* b, double* r);
+void calculate_conductivity ( double *data, size_t len, double temp, double vol, double timestep );

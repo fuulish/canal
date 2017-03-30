@@ -28,7 +28,7 @@ along with canal.  If not, see <http://www.gnu.org/licenses/>.
 #include <math.h>
 #include <gsl/gsl_fit.h>
 
-int linear_regression(size_t n, const double x[], const double y[], double* m, double* b, double* r)
+int get_linear_regression(size_t n, const double x[], const double y[], double* m, double* b, double* r)
 {
   size_t xstride = 1;
   size_t ystride = 1;
@@ -40,7 +40,7 @@ int linear_regression(size_t n, const double x[], const double y[], double* m, d
   return ret;
 }
 
-void get_linear_regression ( double *data, size_t len, double temp, double vol, double timestep )
+void calculate_conductivity ( double *data, size_t len, double temp, double vol, double timestep )
 {
   int i;
   double m, b, r, cond;
@@ -49,20 +49,20 @@ void get_linear_regression ( double *data, size_t len, double temp, double vol, 
   for ( i=0; i<len; i++ )
     time[i] = i*timestep;
 
-  linear_regression(len, time, data, &m, &b, &r);
+  get_linear_regression(len, time, data, &m, &b, &r);
 
   cond = m / (6. * vol * KBOLTZ * temp );
   cond *= E2C*E2C / A2M / FS2S;
 
   double m1, b1, r1, cond1;
   int hlen = len/2;
-  linear_regression(hlen, time, data, &m1, &b1, &r1);
+  get_linear_regression(hlen, time, data, &m1, &b1, &r1);
 
   cond1 = m1 / (6. * vol * KBOLTZ * temp );
   cond1 *= E2C*E2C / A2M / FS2S;
 
   double m2, b2, r2, cond2;
-  linear_regression(hlen, &(time[hlen]), &(data[hlen]), &m2, &b2, &r2);
+  get_linear_regression(hlen, &(time[hlen]), &(data[hlen]), &m2, &b2, &r2);
 
   cond2 = m2 / (6. * vol * KBOLTZ * temp );
   cond2 *= E2C*E2C / A2M / FS2S;

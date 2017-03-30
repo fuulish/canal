@@ -125,13 +125,13 @@ int main(int argc, char *argv[]) {
     nlns_fit = fitlength * nlns;
 
     printf("NEINST: ");
-    get_linear_regression(&(qflux_neinst[fitstrt]), nlns_fit, temp, avvol, timestep);
+    calculate_conductivity(&(qflux_neinst[fitstrt]), nlns_fit, temp, avvol, timestep);
     printf("CATCAT: ");
-    get_linear_regression(&(qflux_catcat[fitstrt]), nlns_fit, temp, avvol, timestep);
+    calculate_conductivity(&(qflux_catcat[fitstrt]), nlns_fit, temp, avvol, timestep);
     printf("ANIANI: ");
-    get_linear_regression(&(qflux_aniani[fitstrt]), nlns_fit, temp, avvol, timestep);
+    calculate_conductivity(&(qflux_aniani[fitstrt]), nlns_fit, temp, avvol, timestep);
     printf("ANICAT: ");
-    get_linear_regression(&(qflux_anicat[fitstrt]), nlns_fit, temp, avvol, timestep);
+    calculate_conductivity(&(qflux_anicat[fitstrt]), nlns_fit, temp, avvol, timestep);
 
     free ( qflux_neinst );
     free ( qflux_catcat );
@@ -148,7 +148,7 @@ int main(int argc, char *argv[]) {
     nlns_fit = fitlength * nlns;
 
     printf("FULL: ");
-    get_linear_regression(&(qflux[fitstrt]), nlns_fit, temp, avvol, timestep);
+    calculate_conductivity(&(qflux[fitstrt]), nlns_fit, temp, avvol, timestep);
 
     write_array_to_file ( "cond_all.out", qflux, 1, nlns );
 
