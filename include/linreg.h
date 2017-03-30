@@ -19,9 +19,5 @@ You should have received a copy of the GNU General Public License
 along with canal.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-//#define REAL float
-#define REAL double
-
-int linreg(int n, const double x[], const double y[], double* m, double* b, double* r);
+int linear_regression(int n, const double x[], const double y[], double* m, double* b, double* r);
 void get_linear_regression ( double *data, int len, double temp, double vol, double timestep );

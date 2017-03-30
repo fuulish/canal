@@ -25,46 +25,39 @@ along with canal.  If not, see <http://www.gnu.org/licenses/>.
 #include "io.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h>                           /* math functions                */
+#include <math.h>
 
-inline static REAL sqr(REAL x) {
-  return x*x;
-}
-
-int linreg(int n, const REAL x[], const REAL y[], REAL* m, REAL* b, REAL* r)
+int linear_regression(int n, const double x[], const double y[], double* m, double* b, double* r)
 {
-  REAL sumx = 0.0;                        /* sum of x                      */
-  REAL sumx2 = 0.0;                       /* sum of x**2                   */
-  REAL sumxy = 0.0;                       /* sum of x * y                  */
-  REAL sumy = 0.0;                        /* sum of y                      */
-  REAL sumy2 = 0.0;                       /* sum of y**2                   */
+  double sum_x = 0.0;
+  double sum_x2 = 0.0;
+  double sum_xy = 0.0;
+  double sum_y = 0.0;
+  double sum_y2 = 0.0;
 
   int i;
-  for ( i=0;i<n;i++)
-  {
-  sumx  += x[i];
-  sumx2 += sqr(x[i]);
-  sumxy += x[i] * y[i];
-  sumy  += y[i];
-  sumy2 += sqr(y[i]);
+  for ( i=0; i<n ; ++i) {
+    sum_x  += x[i];
+    sum_x2 += x[i] * x[i];
+    sum_xy += x[i] * y[i];
+    sum_y  += y[i];
+    sum_y2 += y[i] * y[i];
   }
 
-  REAL denom = (n * sumx2 - sqr(sumx));
+  double denom = (n * sum_x2 - sum_x * sum_x);
   if (denom == 0) {
     // singular matrix. can't solve the problem.
     *m = 0;
     *b = 0;
-    if (r) *r = 0;
+    if ( r != NULL ) *r = 0;
     return 1;
   }
 
-  *m = (n * sumxy  -  sumx * sumy) / denom;
-  *b = (sumy * sumx2  -  sumx * sumxy) / denom;
-  if (r!=NULL) {
-    *r = (sumxy - sumx * sumy / n) /          /* compute correlation coeff     */
-    sqrt((sumx2 - sqr(sumx)/n) *
-    (sumy2 - sqr(sumy)/n));
-  }
+  *m = (n * sum_xy  -  sum_x * sum_y) / denom;
+  *b = (sum_y * sum_x2  -  sum_x * sum_xy) / denom;
+
+  if ( r != NULL )
+    *r = (sum_xy - sum_x * sum_y / n) / sqrt((sum_x2 - sum_x * sum_x / n) * (sum_y2 - sum_y * sum_y / n));
 
    return 0;
 }
@@ -78,20 +71,20 @@ void get_linear_regression ( double *data, int len, double temp, double vol, dou
   for ( i=0; i<len; i++ )
     time[i] = i*timestep;
 
-  linreg(len, time, data, &m, &b, &r);
+  linear_regression(len, time, data, &m, &b, &r);
 
   cond = m / (6. * vol * KBOLTZ * temp );
   cond *= E2C*E2C / A2M / FS2S;
 
   double m1, b1, r1, cond1;
   int hlen = len/2;
-  linreg(hlen, time, data, &m1, &b1, &r1);
+  linear_regression(hlen, time, data, &m1, &b1, &r1);
 
   cond1 = m1 / (6. * vol * KBOLTZ * temp );
   cond1 *= E2C*E2C / A2M / FS2S;
 
   double m2, b2, r2, cond2;
-  linreg(hlen, &(time[hlen]), &(data[hlen]), &m2, &b2, &r2);
+  linear_regression(hlen, &(time[hlen]), &(data[hlen]), &m2, &b2, &r2);
 
   cond2 = m2 / (6. * vol * KBOLTZ * temp );
   cond2 *= E2C*E2C / A2M / FS2S;
