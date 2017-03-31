@@ -178,10 +178,10 @@ int main(int argc, char *argv[]) {
 
       get_vflux_locl ( qflux_neinst, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, nrestart, dr, rstart, rnum, cell, timestep );
 
-      write_array_to_file ( "cond_neinst.out", qflux_neinst, 1, rnum );
-      write_array_to_file ( "cond_catcat.out", qflux_catcat, 1, rnum );
-      write_array_to_file ( "cond_anicat.out", qflux_anicat, 1, rnum );
-      write_array_to_file ( "cond_aniani.out", qflux_aniani, 1, rnum );
+      write_array_to_file ( "velp_neinst.out", qflux_neinst, 1, rnum );
+      write_array_to_file ( "velp_catcat.out", qflux_catcat, 1, rnum );
+      write_array_to_file ( "velp_anicat.out", qflux_anicat, 1, rnum );
+      write_array_to_file ( "velp_aniani.out", qflux_aniani, 1, rnum );
 
       printf("NUMBER OF COLUMNS: %i AND NUMBER OF LINES: %i\n", ncol, nlns);
 
