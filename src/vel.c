@@ -231,6 +231,10 @@ void get_vflux_locl ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
   divide_array_array_inplace ( cnd_aa, nrm_aa, 1, rnum );
 
 #ifdef DEBUG
+  write_array_to_file ( "norm_neinst.out", nrm_ne, 1, rnum );
+  write_array_to_file ( "norm_catcat.out", nrm_cc, 1, rnum );
+  write_array_to_file ( "norm_anicat.out", nrm_ac, 1, rnum );
+  write_array_to_file ( "norm_aniani.out", nrm_aa, 1, rnum );
 #endif
 
   // free (nrm_neinst);
