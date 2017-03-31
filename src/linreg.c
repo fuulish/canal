@@ -40,14 +40,14 @@ int get_linear_regression(size_t n, const double x[], const double y[], double* 
   return ret;
 }
 
-void calculate_conductivity ( double *data, size_t len, double temp, double vol, double timestep )
+void calculate_conductivity ( double *data, size_t len, double temp, double vol, double timestep, int fitstrt )
 {
   int i;
   double m, b, r, cond;
 
   double *time = (double *) malloc(len * sizeof(double));
-  for ( i=0; i<len; i++ )
-    time[i] = i*timestep;
+  for ( i=0; i<len; ++i )
+    time[i] = (i + fitstrt) * timestep;
 
   get_linear_regression(len, time, data, &m, &b, &r);
 
@@ -69,6 +69,8 @@ void calculate_conductivity ( double *data, size_t len, double temp, double vol,
 
   printf("FIT PARAMETER: %14.8f %14.8f\n", m, b);
   printf("CONDUCTIVITY IS: %14.8f +/- %14.8f S/m\n", cond, fabs(cond2-cond1));
+
+  free( time );
 
 #ifdef DEBUG
   multiply_array_number_inplace ( time, m, 1, len );

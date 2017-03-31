@@ -28,6 +28,7 @@ along with canal.  If not, see <http://www.gnu.org/licenses/>.
 #include "msd.h"
 #include "vel.h"
 #include "constants.h"
+#include "linreg.h"
 
 int main(int argc, char *argv[]) {
 
@@ -46,6 +47,8 @@ int main(int argc, char *argv[]) {
   double rstart = 5.;
   double dr = 2.;
   int task = NTTN;
+  double fitoffset = 0.1;
+  double fitlength = 0.9;
 
   char xcom_fn[100];
   char ycom_fn[100];
@@ -55,7 +58,7 @@ int main(int argc, char *argv[]) {
   char cell_fn[100];
 
   if ( argc > 1 )
-    read_input( argv[1], &nrestart, &avvol, &temp, &timestep, &split, &spatial, &rnum, &rstart, &dr, xcom_fn, ycom_fn, zcom_fn, chgs_fn, cell_fn, &task );
+    read_input( argv[1], &nrestart, &avvol, &temp, &timestep, &split, &spatial, &rnum, &rstart, &dr, xcom_fn, ycom_fn, zcom_fn, chgs_fn, cell_fn, &task, &fitoffset, &fitlength );
   else
     print_error ( INCOMPLETE_INPUT, "Input file is missing", __FILE__, __LINE__ );
 
@@ -73,23 +76,30 @@ int main(int argc, char *argv[]) {
   analyze_file ( chgs_fn, &qcol, &nchg, delim );
   chgs = read_file_double ( chgs_fn, nchg, qcol, delim );
 
-  analyze_file ( cell_fn, &ccol, &ncll, delim );
-  cell = read_file_double ( cell_fn, ncll, ccol, delim );
-
   printf("NCHGS: %i, NCOL: %i\n", nchg, ncol);
   if ( nchg != ncol ) {
     print_error ( FATAL, "Dimensions of charge array and position data don't match", __FILE__, __LINE__ );
     return FATAL;
   }
 
-  if ( ncll != nlns ) {
-    print_error ( FATAL, "Dimensions of cell array and position data don't match", __FILE__, __LINE__ );
-    return FATAL;
+  //FUDO| this needs fixing, cell allocation below only to avoid issues with maybe-unitialized warning
+  if ( rnum > 1 ) {
+
+    analyze_file ( cell_fn, &ccol, &ncll, delim );
+    cell = read_file_double ( cell_fn, ncll, ccol, delim );
+
+    if ( ncll != nlns ) {
+      print_error ( FATAL, "Dimensions of cell array and position data don't match", __FILE__, __LINE__ );
+      return FATAL;
+    }
+  }
+  else {
+    cell = (double *) calloc ( nlns, sizeof (double));
   }
 
   /* data I looks fine
-  for ( i=1; i<2; i++ ) {
-    for ( j=0; j<nlns; j++ ) {
+  for ( i=1; i<2; ++i ) {
+    for ( j=0; j<nlns; ++j ) {
       printf("%14.8f\n", ael(xcom, nlns, i, j));
     }
   }
@@ -118,6 +128,19 @@ int main(int argc, char *argv[]) {
 
         printf("NUMBER OF COLUMNS: %i AND NUMBER OF LINES: %i\n", ncol, nlns);
 
+        int fitstrt, nlns_fit;
+        fitstrt = fitoffset * nlns;
+        nlns_fit = fitlength * nlns;
+
+        printf("NEINST: ");
+        calculate_conductivity(&(qflux_neinst[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt);
+        printf("CATCAT: ");
+        calculate_conductivity(&(qflux_catcat[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt);
+        printf("ANIANI: ");
+        calculate_conductivity(&(qflux_aniani[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt);
+        printf("ANICAT: ");
+        calculate_conductivity(&(qflux_anicat[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt);
+
         free ( qflux_neinst );
         free ( qflux_catcat );
         free ( qflux_anicat );
@@ -128,13 +151,20 @@ int main(int argc, char *argv[]) {
 
         get_qflux ( qflux, xcom, ycom, zcom, chgs, ncol, nlns, nrestart);
 
+        int fitstrt, nlns_fit;
+        fitstrt = fitoffset * nlns;
+        nlns_fit = fitlength * nlns;
+        printf("NLNS_FIT: %i %i %i\n", nlns_fit, nlns, fitstrt);
+
+        printf("FULL: ");
+        calculate_conductivity(&(qflux[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt);
+
         write_array_to_file ( "cond_all.out", qflux, 1, nlns );
 
         printf("NUMBER OF COLUMNS: %i AND NUMBER OF LINES: %i\n", ncol, nlns);
 
         free ( qflux );
       }
-
       }
       break;
     case VELP:
@@ -170,6 +200,8 @@ int main(int argc, char *argv[]) {
   free ( xcom );
   free ( ycom );
   free ( zcom );
+
+  free ( chgs );
 
   return 0;
 

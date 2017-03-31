@@ -46,7 +46,7 @@ int analyze_file ( char *fname, int *ncol, int *nlns, char *delim)
 
       ncolumn = 0;
       while ( tok !=  NULL ) {
-        ncolumn++;
+        ++ncolumn;
         tok = strtok ( NULL, delim );
       }
 
@@ -58,7 +58,7 @@ int analyze_file ( char *fname, int *ncol, int *nlns, char *delim)
         *ncol = ncolumn;
       }
 
-      (*nlns)++;
+      ++(*nlns);
 
     }
 
@@ -95,10 +95,10 @@ double *read_file_double(char *fname, int nlns, int ncol, char *delim)
         ael(data, nlns, i, j) = atof ( tok );
 
         tok = strtok ( NULL, delim );
-        i++;
+        ++i;
       }
 
-      j++;
+      ++j;
 
     }
     fclose ( datei );
@@ -119,8 +119,8 @@ void write_array_to_file ( char *fname, double *a, int ncol, int nlns )
   //FUDO| catch error like in read_input
   if ( datei != NULL ) {
 
-    for ( j=0; j<nlns; j++ ) {
-      for ( i=0; i<ncol; i++ ) {
+    for ( j=0; j<nlns; ++j ) {
+      for ( i=0; i<ncol; ++i ) {
         fprintf(datei, " %e", ael(a, nlns, i, j));
       }
       fprintf(datei, "\n");
@@ -130,7 +130,7 @@ void write_array_to_file ( char *fname, double *a, int ncol, int nlns )
   }
 }
 
-void read_input( char *fname, int *nrestart, double *avvol, double *temp, double *timestep, int *split, int *spatial, int *rnum, double *rstart, double *dr, char *xcom_fn, char *ycom_fn, char *zcom_fn, char *chgs_fn, char *cell_fn, int *task )
+void read_input( char *fname, int *nrestart, double *avvol, double *temp, double *timestep, int *split, int *spatial, int *rnum, double *rstart, double *dr, char *xcom_fn, char *ycom_fn, char *zcom_fn, char *chgs_fn, char *cell_fn, int *task, double *fitoffset, double *fitlength )
 {
     FILE *datei;
     char *txt;
@@ -153,6 +153,8 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
       CHGS,
       CELL,
       TASK,
+      FITOFFSET,
+      FITLENGTH,
     };
 
     int def_nrestart = NRESTART;
@@ -167,11 +169,13 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
     int def_chgs = CHGS;
     int def_cell = CELL;
     int def_task = TASK;
+    int def_fitoffset = FITOFFSET;
+    int def_fitlength = FITLENGTH;
 
     datei = fopen(fname, "r");
 
     if ( datei == NULL )
-      print_error ( FILE_NOT_FOUND, "control", __FILE__, __LINE__ );
+      print_error ( FILE_NOT_FOUND, fname, __FILE__, __LINE__ );
 
     while ( getline ( &txt, &nbytes, datei ) != -1 ) {
       variable = strtok (txt, "=");
@@ -211,6 +215,13 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
 
         buf = strtok (value, " ");
         *rnum = atoi(buf);
+
+        if ( *rnum < 2 ) {
+        // if ( (*rnum == 0) || (*rnum == 1) ) {
+          *rnum = 1;
+          *spatial = 0;
+          continue;
+        }
 
         buf = strtok (NULL, " ");
         *rstart = atof(buf);
@@ -258,6 +269,18 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
 
         def_task = 0;
       }
+      else if ( strstr(variable, "fitoffset" ) != NULL )
+      {
+        buf = strtok (value, " \n");
+        *fitoffset = atof(buf);
+        def_fitoffset = 0;
+      }
+      else if ( strstr(variable, "fitlength" ) != NULL )
+      {
+        buf = strtok (value, " \n");
+        *fitlength = atof(buf);
+        def_fitlength = 0;
+      }
     }
 
     if ( def_nrestart == NRESTART )
@@ -295,6 +318,12 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
 
     if ( def_task == TASK )
       print_error ( INCOMPLETE_INPUT, "TASK is missing", __FILE__, __LINE__);
+
+    if ( def_fitoffset == FITOFFSET )
+      print_warning ( YOU_KNOW_WHAT, "Using defaults for FITOFFSET");
+
+    if ( def_fitlength == FITLENGTH )
+      print_warning ( YOU_KNOW_WHAT, "Using defaults for FITLENGTH");
 
     fclose(datei);
     free(txt);
