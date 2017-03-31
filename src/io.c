@@ -172,7 +172,7 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
     datei = fopen(fname, "r");
 
     if ( datei == NULL )
-      print_error ( FILE_NOT_FOUND, "control", __FILE__, __LINE__ );
+      print_error ( FILE_NOT_FOUND, fname, __FILE__, __LINE__ );
 
     while ( getline ( &txt, &nbytes, datei ) != -1 ) {
       variable = strtok (txt, "=");

@@ -125,13 +125,13 @@ int main(int argc, char *argv[]) {
     nlns_fit = fitlength * nlns;
 
     printf("NEINST: ");
-    calculate_conductivity(&(qflux_neinst[fitstrt]), nlns_fit, temp, avvol, timestep);
+    calculate_conductivity(&(qflux_neinst[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt);
     printf("CATCAT: ");
-    calculate_conductivity(&(qflux_catcat[fitstrt]), nlns_fit, temp, avvol, timestep);
+    calculate_conductivity(&(qflux_catcat[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt);
     printf("ANIANI: ");
-    calculate_conductivity(&(qflux_aniani[fitstrt]), nlns_fit, temp, avvol, timestep);
+    calculate_conductivity(&(qflux_aniani[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt);
     printf("ANICAT: ");
-    calculate_conductivity(&(qflux_anicat[fitstrt]), nlns_fit, temp, avvol, timestep);
+    calculate_conductivity(&(qflux_anicat[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt);
 
     free ( qflux_neinst );
     free ( qflux_catcat );
@@ -146,9 +146,10 @@ int main(int argc, char *argv[]) {
     int fitstrt, nlns_fit;
     fitstrt = fitoffset * nlns;
     nlns_fit = fitlength * nlns;
+    printf("NLNS_FIT: %i %i %i\n", nlns_fit, nlns, fitstrt);
 
     printf("FULL: ");
-    calculate_conductivity(&(qflux[fitstrt]), nlns_fit, temp, avvol, timestep);
+    calculate_conductivity(&(qflux[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt);
 
     write_array_to_file ( "cond_all.out", qflux, 1, nlns );
 
@@ -162,6 +163,8 @@ int main(int argc, char *argv[]) {
   free ( xcom );
   free ( ycom );
   free ( zcom );
+
+  free ( chgs );
 
   return 0;
 
