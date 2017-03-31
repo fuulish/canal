@@ -1,8 +1,9 @@
 IDIR =../include
 CC = gcc
-#CC = clang
 COMPILER_FLAGS = -Wall -g -O3 -march=native -mpc64  -fno-exceptions -ffast-math -funroll-loops -fstrict-aliasing -finline-functions
 #COMPILER_FLAGS = -Wall -g -O2 -march=native -mpc64  -fno-exceptions -funroll-loops -fstrict-aliasing -finline-functions
+#CC = clang
+#COMPILER_FLAGS = -Wall -g -O3 -march=native -fno-exceptions -ffast-math -funroll-loops -fstrict-aliasing -finline-functions
 DFLAGS = -DDEBUG
 CFLAGS = -I$(IDIR) $(COMPILER_FLAGS) $(DFLAGS)
 
