@@ -46,7 +46,7 @@ void calculate_conductivity ( double *data, size_t len, double temp, double vol,
   double m, b, r, cond;
 
   double *time = (double *) malloc(len * sizeof(double));
-  for ( i=0; i<len; i++ )
+  for ( i=0; i<len; ++i )
     time[i] = (i + fitstrt) * timestep;
 
   get_linear_regression(len, time, data, &m, &b, &r);

@@ -99,18 +99,18 @@ void get_qflux ( double *cnd, double *x, double *y, double *z, double *chg, int 
   // double *msd = (double *) calloc ( nlns, sizeof(double));
 
   // for savety reason assume the worst, i.e., conductivity/output array has not been initialized properly
-  for ( i=0; i<nlns; i++ )
+  for ( i=0; i<nlns; ++i )
     cnd[i] = 0.;
 
-  for ( r=0; r<nrestart; r++ ){
+  for ( r=0; r<nrestart; ++r ){
 
     offcnt = r*offset;
     nlns_tmp = nlns - offcnt;
     add_array_number_inplace ( nrm, 1., 1, nlns_tmp );
 
     // different molecules
-    for ( i=0; i<ncol; i++ ) {
-      for ( j=i; j<ncol; j++ ) {
+    for ( i=0; i<ncol; ++i ) {
+      for ( j=i; j<ncol; ++j ) {
 
         if ( i == j )
           scale = 1.;
@@ -165,18 +165,18 @@ void get_qflux_dsts ( double *cnd_cc, double *cnd_ca, double *cnd_aa, double *x,
   // double *msd = (double *) calloc ( nlns, sizeof(double));
 
   // for savety reason assume the worst, i.e., conductivity/output array has not been initialized properly
-  for ( i=0; i<nlns; i++ )
+  for ( i=0; i<nlns; ++i )
     cnd[i] = 0.;
 
-  for ( r=0; r<nrestart; r++ ){
+  for ( r=0; r<nrestart; ++r ){
 
     offcnt = r*offset;
     nlns_tmp = nlns - offcnt;
     add_array_number_inplace ( nrm, 1., 1, nlns_tmp );
 
     // different molecules
-    for ( i=0; i<ncol; i++ ) {
-      for ( j=i; j<ncol; j++ ) {
+    for ( i=0; i<ncol; ++i ) {
+      for ( j=i; j<ncol; ++j ) {
 
         if ( i == j )
           scale = 1.;
@@ -244,22 +244,22 @@ void get_qflux_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
   nlns_tmp = nlns*rnum;
 
   // for savety reason assume the worst, i.e., conductivity/output array has not been initialized properly
-  for ( i=0; i<nlns; i++ ) {
+  for ( i=0; i<nlns; ++i ) {
     cnd_cc[i] = 0.;
     cnd_ac[i] = 0.;
     cnd_aa[i] = 0.;
     neinst[i] = 0.;
   }
 
-  for ( n=0; n<nrestart; n++ ){
+  for ( n=0; n<nrestart; ++n ){
 
     offcnt = n*offset;
     nlns_tmp = nlns - offcnt;
     add_array_number_inplace ( nrm, 1., 1, nlns_tmp );
 
     // different molecules
-    for ( i=0; i<ncol; i++ ) {
-      for ( j=i; j<ncol; j++ ) {
+    for ( i=0; i<ncol; ++i ) {
+      for ( j=i; j<ncol; ++j ) {
 
         if ( i == j )
           scale = 1.;

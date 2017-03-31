@@ -45,7 +45,7 @@ int analyze_file ( char *fname, int *ncol, int *nlns, char *delim)
 
       ncolumn = 0;
       while ( tok !=  NULL ) {
-        ncolumn++;
+        ++ncolumn;
         tok = strtok ( NULL, delim );
       }
 
@@ -57,7 +57,7 @@ int analyze_file ( char *fname, int *ncol, int *nlns, char *delim)
         *ncol = ncolumn;
       }
 
-      (*nlns)++;
+      ++(*nlns);
 
     }
 
@@ -94,10 +94,10 @@ double *read_file_double(char *fname, int nlns, int ncol, char *delim)
         ael(data, nlns, i, j) = atof ( tok );
 
         tok = strtok ( NULL, delim );
-        i++;
+        ++i;
       }
 
-      j++;
+      ++j;
 
     }
     fclose ( datei );
@@ -118,8 +118,8 @@ void write_array_to_file ( char *fname, double *a, int ncol, int nlns )
   //FUDO| catch error like in read_input
   if ( datei != NULL ) {
 
-    for ( j=0; j<nlns; j++ ) {
-      for ( i=0; i<ncol; i++ ) {
+    for ( j=0; j<nlns; ++j ) {
+      for ( i=0; i<ncol; ++i ) {
         fprintf(datei, " %e", ael(a, nlns, i, j));
       }
       fprintf(datei, "\n");

@@ -94,8 +94,8 @@ int main(int argc, char *argv[]) {
   }
 
   /* data I looks fine
-  for ( i=1; i<2; i++ ) {
-    for ( j=0; j<nlns; j++ ) {
+  for ( i=1; i<2; ++i ) {
+    for ( j=0; j<nlns; ++j ) {
       printf("%14.8f\n", ael(xcom, nlns, i, j));
     }
   }
