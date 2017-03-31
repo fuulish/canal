@@ -35,6 +35,9 @@ The keywords are:
     optional:
         - cell:             cell dimensions (if a spatial decomposition is what you're looking for)
         - nrestart:         number of restart points along the trajectory
+        - fitoffset:        where to start linear fit (fraction of data, default 0.1)
+        - fitlength:        length of data for linear fit (fraction of data, default 0.9)
+                            fitoffset + fitlength should not exceed 1.0, otherwise accessing unallocated memory
 
         needed for correct conductivty calculation:
             - temp:         temperature (in K)
