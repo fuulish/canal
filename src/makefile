@@ -47,13 +47,13 @@ distclean: clean
 tests: normal.out split.out spatial.out
 
 normal.out: all
-	./canal ../data/normal.inp |tee normal.out
+	./canal ../data/normal.inp > normal.out
 
 check-normal: normal.out
 	diff cond_all.out ../refs/cond_all.dat
 
 split.out: all
-	./canal ../data/split.inp |tee split.out
+	./canal ../data/split.inp > split.out
 
 check-split: split.out
 	diff cond_neinst.out ../refs/cond_neinst.dat
@@ -62,7 +62,7 @@ check-split: split.out
 	diff cond_aniani.out ../refs/cond_aniani.dat
 
 spatial.out: all
-	./canal ../data/spatial.inp |tee spatial.out
+	./canal ../data/spatial.inp > spatial.out
 	mv cond_neinst.out cond_neinst_spatial.out
 	mv cond_catcat.out cond_catcat_spatial.out
 	mv cond_anicat.out cond_anicat_spatial.out
