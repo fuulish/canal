@@ -265,6 +265,8 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
           *task = COND;
         else if ( strstr ( value, "velp" ) != NULL )
           *task = VELP;
+        else if ( strstr ( value, "elmo" ) != NULL )
+          *task = ELMO;
 
         def_task = 0;
       }

@@ -191,6 +191,67 @@ int main(int argc, char *argv[]) {
       free ( qflux_aniani );
       }
       break;
+    case ELMO:
+      {
+        // check a couple of things, and maybe warn
+        int arrlen = nlns * rnum;
+
+        double *qflux_neinst = (double *) calloc ( arrlen, sizeof(double));
+        double *qflux_catcat = (double *) calloc ( arrlen, sizeof(double));
+        double *qflux_anicat = (double *) calloc ( arrlen, sizeof(double));
+        double *qflux_aniani = (double *) calloc ( arrlen, sizeof(double));
+
+        get_mobil_srtd ( qflux_neinst, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, nrestart, dr, rstart, rnum, cell );
+
+        write_array_to_file ( "mobil_neinst.out", qflux_neinst, 1, nlns );
+        write_array_to_file ( "mobil_catcat.out", qflux_catcat, rnum, nlns );
+        write_array_to_file ( "mobil_anicat.out", qflux_anicat, rnum, nlns );
+        write_array_to_file ( "mobil_aniani.out", qflux_aniani, rnum, nlns );
+
+        printf("NUMBER OF COLUMNS: %i AND NUMBER OF LINES: %i\n", ncol, nlns);
+
+        int fitstrt, nlns_fit;
+        fitstrt = fitoffset * nlns;
+        nlns_fit = fitlength * nlns;
+
+        //FUX| for now we'll make use of the conductivity calculation, which is essentially the same, except a couple of pre-factors
+        //FUX| we use (E2C * NCHG / A2M^3) instead of the volume, need to count anions and cations
+
+        int i;
+        int ncat = 0;
+        int nani = 0;
+        // int ntot = 0;
+
+        for ( i=0; i<ncol; ++i ) {
+          if( chgs[i] < 0 )
+            nani += 1;
+          else if( chgs[i] > 0 )
+            ncat += 1;
+        }
+
+        // ntot = nani + ncat;
+        double uniconv = E2C / (A2M * A2M * A2M);
+        double elmo_ani, elmo_cat;
+
+        //FUX| neinst and anicat don't make much sense right now
+
+        // printf("NEINST: ");
+        // calculate_conductivity(&(qflux_neinst[fitstrt]), nlns_fit, temp, ntot*uniconv, timestep, fitstrt);
+        printf("CATCAT: ");
+        elmo_cat = calculate_conductivity(&(qflux_catcat[fitstrt]), nlns_fit, temp, ncat*uniconv, timestep, fitstrt);
+        printf("ANIANI: ");
+        elmo_ani = calculate_conductivity(&(qflux_aniani[fitstrt]), nlns_fit, temp, nani*uniconv, timestep, fitstrt);
+        // printf("ANICAT: ");
+        // calculate_conductivity(&(qflux_anicat[fitstrt]), nlns_fit, temp, ntot*uniconv, timestep, fitstrt);
+
+        printf("actual conductivity is: %14.8f\n", -1.*elmo_ani / avvol * nani * uniconv + 1.*elmo_cat / avvol * ncat * uniconv );
+
+        free ( qflux_neinst );
+        free ( qflux_catcat );
+        free ( qflux_anicat );
+        free ( qflux_aniani );
+      }
+      break;
     default:
       break;
   }

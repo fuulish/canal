@@ -23,6 +23,7 @@ enum tasks_e {
   NTTN=0,
   COND,
   VELP,
+  ELMO,
 };
 
 int analyze_file ( char *fname, int *ncol, int *nlns, char *delim);

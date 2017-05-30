@@ -74,5 +74,10 @@ check-spatial: spatial.out
 	diff cond_anicat_spatial.out ../refs/cond_anicat_spatial.dat
 	diff cond_aniani_spatial.out ../refs/cond_aniani_spatial.dat
 
-check: check-normal check-split check-spatial
+elmo.out: all
+	./canal ../data/elmo.inp > elmo.out
+
+check-elmo: elmo.out
+
+check: check-normal check-split check-spatial check-elmo
 	../tools/conform.sh
