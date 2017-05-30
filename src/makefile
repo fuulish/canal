@@ -44,22 +44,25 @@ distclean: clean
 #tests:
 #	./canal $@
 
-tests: normal split spatial
+tests: normal.out split.out spatial.out
 
-normal:
-	./canal ../data/normal.inp
+normal.out: canal
+	./canal ../data/normal.inp &> normal.out
 	diff cond_all.out ../refs/cond_all.dat
 
-split:
-	./canal ../data/split.inp
+split.out: canal
+	./canal ../data/split.inp &> split.out
 	diff cond_neinst.out ../refs/cond_neinst.dat
 	diff cond_catcat.out ../refs/cond_catcat.dat
 	diff cond_anicat.out ../refs/cond_anicat.dat
 	diff cond_aniani.out ../refs/cond_aniani.dat
 
-spatial:
-	./canal ../data/spatial.inp
+spatial.out: canal
+	./canal ../data/spatial.inp &> spatial.out
 	diff cond_neinst.out ../refs/cond_neinst_spatial.dat
 	diff cond_catcat.out ../refs/cond_catcat_spatial.dat
 	diff cond_anicat.out ../refs/cond_anicat_spatial.dat
 	diff cond_aniani.out ../refs/cond_aniani_spatial.dat
+
+check:	tests
+	../tools/conform.sh
