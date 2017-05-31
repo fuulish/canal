@@ -30,7 +30,7 @@ canal: $(OBJ)
 $(ODIR):
 	mkdir $(ODIR)
 
-.PHONY: clean distclean
+.PHONY: clean distclean check check-normal check-split check-spatial check-elmo
 
 clean:
 	rm -f $(ODIR)/*.o *~ core $(INCDIR)/*~
