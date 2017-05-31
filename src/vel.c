@@ -133,6 +133,13 @@ void get_vflux_locl ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
   for ( n=0; n<ncol; n++)
     calculate_velocities ( asub(vx, nlns, n, 0), asub(vy, nlns, n, 0), asub(vz, nlns, n, 0), asub(x, nlns, n, 0), asub(y, nlns, n, 0), asub(z, nlns, n, 0), nlns, timestep );
 
+  if( nrestart < 0 ) {
+    write_array_to_file( "vx.out", vx, ncol, nlns );
+    write_array_to_file( "vy.out", vy, ncol, nlns );
+    write_array_to_file( "vz.out", vz, ncol, nlns );
+    return;
+  }
+
   int nrmlen;
 
   //FUDO| for each kind of correlation only a distance dependence, we will average over all molecules/kinds
