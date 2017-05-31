@@ -37,10 +37,10 @@ for i in xrange(np.shape(vx)[1]):
 
 cory = None
 
-for i in xrange(np.shape(vx)[1]):
-    for j in xrange(i, np.shape(vx)[1]):
+for i in xrange(np.shape(vy)[1]):
+    for j in xrange(i, np.shape(vy)[1]):
 
-        forc = correlate(vx[:,i], vx[:,j])
+        forc = correlate(vy[:,i], vy[:,j])
 
         if i != j:
             forc *= 2
@@ -55,10 +55,10 @@ for i in xrange(np.shape(vx)[1]):
 
 corz = None
 
-for i in xrange(np.shape(vx)[1]):
-    for j in xrange(i, np.shape(vx)[1]):
+for i in xrange(np.shape(vz)[1]):
+    for j in xrange(i, np.shape(vz)[1]):
 
-        forc = correlate(vx[:,i], vx[:,j])
+        forc = correlate(vz[:,i], vz[:,j])
         #if i % 100 == 0:
         #    plt.plot(forc, label='%i-%i' %(i,j))
 
