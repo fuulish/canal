@@ -30,10 +30,14 @@ along with canal.  If not, see <http://www.gnu.org/licenses/>.
 #include "io.h"
 #endif
 
-void calculate_msd_one ( double *out, double *x, double *xo, int nlns )
+void calculate_msd_one ( double *out, double *x, double *xo, int nlns, int nrestart )
 {
+  int n;
+
   double xdlt[nlns];
   double xodlt[nlns];
+  double tmp[nlns];
+
   // this one saves 10% - the others not so much
   // double *xdlt = (double *) malloc ( nlns * sizeof(double) );
   // double *xodlt = (double *) malloc ( nlns * sizeof(double) );
@@ -41,43 +45,72 @@ void calculate_msd_one ( double *out, double *x, double *xo, int nlns )
   subtract_array_number ( xdlt, x, x[0], 1, nlns );
   subtract_array_number ( xodlt, xo, xo[0], 1, nlns );
 
-  multiply_array_array ( out, xdlt, xodlt, 1, nlns );
+  int offset = nlns / nrestart;
+  int offcnt = 0;
+  int nlns_tmp = nlns;
+
+  for( n=0; n<nrestart; ++n ) {
+
+    offcnt = n*offset;
+    nlns_tmp = nlns - offcnt;
+
+    if( n != 0 ) {
+      // xi = asub(x, i, nlns, offcnt);
+      subtract_array_number( &(xdlt[offcnt]), &(xdlt[offcnt]), xdlt[offcnt], 1, nlns_tmp);
+      subtract_array_number( &(xodlt[offcnt]), &(xodlt[offcnt]), xodlt[offcnt], 1, nlns_tmp);
+    }
+
+    multiply_array_array ( tmp, &(xdlt[offcnt]), &(xodlt[offcnt]), 1, nlns_tmp );
+    add_arrays_inplace( out, tmp, 1, nlns_tmp );
+
+  }
+
+  //FUX| do normalization some place else
 
   // free ( xdlt );
   // free ( xodlt );
 }
 
-void calculate_msd_xyz ( double *out, double *x, double *y, double *z, int nlns )
+void calculate_msd_norm( double* nrm, int nlns, int nrestart )
+{
+
+  int n = 0;
+  int offset = nlns / nrestart;
+  int offcnt = 0;
+  int nlns_tmp = nlns;
+
+  for( n=0; n<nrestart; ++n ) {
+
+    offcnt = n*offset;
+    nlns_tmp = nlns - offcnt;
+
+    // FUX| only do the normalization if we ask for it, this adds useless computational effort if done for each msd
+    add_array_number_inplace ( nrm, 1., 1, nlns_tmp );
+  }
+
+}
+
+void calculate_msd_xyz ( double *out, double *x, double *y, double *z, int nlns, int nrestart )
 {
 
   // double *tmp = (double *) malloc ( nlns * sizeof (double));
-  double tmp[nlns];
 
-  calculate_msd_one ( out, x, x, nlns );
-
-  calculate_msd_one ( tmp, y, y, nlns );
-  add_arrays_inplace ( out, tmp, 1, nlns );
-  
-  calculate_msd_one ( tmp, z, z, nlns );
-  add_arrays_inplace ( out, tmp, 1, nlns );
+  calculate_msd_one ( out, x, x, nlns, nrestart );
+  calculate_msd_one ( out, y, y, nlns, nrestart );
+  calculate_msd_one ( out, z, z, nlns, nrestart );
 
   // free (tmp);
 
 }
 
-void calculate_msd_xyz_cross ( double *out, double *xi, double *yi, double *zi, double *xj, double *yj, double *zj, int nlns )
+void calculate_msd_xyz_cross ( double *out, double *xi, double *yi, double *zi, double *xj, double *yj, double *zj, int nlns, int nrestart )
 {
 
   // double *tmp = (double *) malloc ( nlns * sizeof (double));
-  double tmp[nlns];
 
-  calculate_msd_one ( out, xi, xj, nlns );
-
-  calculate_msd_one ( tmp, yi, yj, nlns );
-  add_arrays_inplace ( out, tmp, 1, nlns );
-  
-  calculate_msd_one ( tmp, zi, zj, nlns );
-  add_arrays_inplace ( out, tmp, 1, nlns );
+  calculate_msd_one ( out, xi, xj, nlns, nrestart );
+  calculate_msd_one ( out, yi, yj, nlns, nrestart );
+  calculate_msd_one ( out, zi, zj, nlns, nrestart );
 
   // free (tmp);
 
@@ -85,14 +118,10 @@ void calculate_msd_xyz_cross ( double *out, double *xi, double *yi, double *zi, 
 
 void get_qflux ( double *cnd, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart )
 {
-  int i, j, r;
-  int nlns_tmp;
-  int offcnt;
+  int i, j;
 
   double scale;
   double *xi, *yi, *zi, *xj, *yj, *zj;
-
-  int offset = nlns / nrestart;
 
   double *tmp = (double *) malloc ( nlns * sizeof(double));
   double *nrm = (double *) calloc ( nlns, sizeof(double));
@@ -102,44 +131,39 @@ void get_qflux ( double *cnd, double *x, double *y, double *z, double *chg, int 
   for ( i=0; i<nlns; ++i )
     cnd[i] = 0.;
 
-  for ( r=0; r<nrestart; ++r ){
+  // different molecules
+  for ( i=0; i<ncol; ++i ) {
+    for ( j=i; j<ncol; ++j ) {
 
-    offcnt = r*offset;
-    nlns_tmp = nlns - offcnt;
-    add_array_number_inplace ( nrm, 1., 1, nlns_tmp );
+      if ( i == j )
+        scale = 1.;
+      else
+        scale = 2.;
 
-    // different molecules
-    for ( i=0; i<ncol; ++i ) {
-      for ( j=i; j<ncol; ++j ) {
+      // get point to beginning of ncol-th sub-array
+      // then use offcnt to start a bit farther down in memory lane
+      xi = asub(x, nlns, i, 0);
+      yi = asub(y, nlns, i, 0);
+      zi = asub(z, nlns, i, 0);
 
-        if ( i == j )
-          scale = 1.;
-        else
-          scale = 2.;
+      xj = asub(x, nlns, j, 0);
+      yj = asub(y, nlns, j, 0);
+      zj = asub(z, nlns, j, 0);
 
-        // get point to beginning of ncol-th sub-array
-        // then use offcnt to start a bit farther down in memory lane
-        xi = asub(x, i, nlns, offcnt);
-        yi = asub(y, i, nlns, offcnt);
-        zi = asub(z, i, nlns, offcnt);
+      zero_out_array( tmp, 1, nlns );
+      calculate_msd_xyz_cross ( tmp, xi, yi, zi, xj,  yj, zj, nlns, nrestart );
+      multiply_array_number_inplace ( tmp, chg[i]*chg[j]*scale, 1, nlns );
 
-        xj = asub(x, j, nlns, offcnt);
-        yj = asub(y, j, nlns, offcnt);
-        zj = asub(z, j, nlns, offcnt);
+      add_arrays_inplace ( cnd, tmp, 1, nlns );
 
-        calculate_msd_xyz_cross ( tmp, xi, yi, zi, xj,  yj, zj, nlns_tmp );
-        multiply_array_number_inplace ( tmp, chg[i]*chg[j]*scale, 1, nlns_tmp );
-
-        add_arrays_inplace ( cnd, tmp, 1, nlns_tmp );
-
-      }
     }
 
-    printf(" %i / %i \r", r, nrestart);
+    printf(" %i / %i \r", i+1, ncol);
     fflush(stdout);
 
   }
 
+  calculate_msd_norm( nrm, nlns, nrestart );
   divide_array_array_inplace ( cnd, nrm, 1, nlns );
 
   free (tmp);
@@ -193,7 +217,7 @@ void get_qflux_dsts ( double *cnd_cc, double *cnd_ca, double *cnd_aa, double *x,
         yj = asub(y, j, nlns, offcnt);
         zj = asub(z, j, nlns, offcnt);
 
-        calculate_msd_xyz_cross ( tmp, xi, yi, zi, xj,  yj, zj, nlns_tmp );
+        calculate_msd_xyz_cross ( tmp, xi, yi, zi, xj,  yj, zj, nlns_tmp, nrestart );
         multiply_array_number_inplace ( tmp, chg[i]*chg[j]*scale, 1, nlns_tmp );
 
         add_arrays_inplace ( cnd, tmp, 1, nlns_tmp );
@@ -277,7 +301,8 @@ void get_qflux_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
         yj = asub(y, j, nlns, offcnt);
         zj = asub(z, j, nlns, offcnt);
 
-        calculate_msd_xyz_cross ( tmp, xi, yi, zi, xj,  yj, zj, nlns_tmp );
+        zero_out_array( tmp, 1, nlns_tmp );
+        calculate_msd_xyz_cross ( tmp, xi, yi, zi, xj,  yj, zj, nlns_tmp, 1 );
         multiply_array_number_inplace ( tmp, chg[i]*chg[j]*scale, 1, nlns_tmp );
 
         if ( i == j ) {
@@ -371,9 +396,7 @@ void get_qflux_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
 
 void get_mobil_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell )
 {
-  int i, j, n;
-  int nlns_tmp;
-  int offcnt;
+  int i, j;
   int rndx;
 
   double *xi, *yi, *zi, *xj, *yj, *zj;
@@ -381,8 +404,6 @@ void get_mobil_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
   // FUX| currently unused
   // double scale;
   // double dst;
-
-  int offset = nlns / nrestart;
 
   double *tmp = (double *) malloc ( nlns * sizeof(double));
   double *nrm = (double *) calloc ( nlns, sizeof(double));
@@ -396,8 +417,6 @@ void get_mobil_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
 
   // double *msd = (double *) calloc ( nlns, sizeof(double));
 
-  nlns_tmp = nlns*rnum;
-
   // for savety reason assume the worst, i.e., conductivity/output array has not been initialized properly
   for ( i=0; i<nlns; ++i ) {
     cnd_cc[i] = 0.;
@@ -406,56 +425,49 @@ void get_mobil_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
     neinst[i] = 0.;
   }
 
-  for ( n=0; n<nrestart; ++n ){
+  // different molecules
+  for ( i=0; i<ncol; ++i ) {
+    for ( j=0; j<ncol; ++j ) {
 
-    offcnt = n*offset;
-    nlns_tmp = nlns - offcnt;
-    add_array_number_inplace ( nrm, 1., 1, nlns_tmp );
+      zero_out_array( tmp, 1, nlns );
 
-    // different molecules
-    for ( i=0; i<ncol; ++i ) {
-      for ( j=0; j<ncol; ++j ) {
+      xi = asub(x, nlns, i, 0);
+      yi = asub(y, nlns, i, 0);
+      zi = asub(z, nlns, i, 0);
+                           
+      xj = asub(x, nlns, j, 0);
+      yj = asub(y, nlns, j, 0);
+      zj = asub(z, nlns, j, 0);
 
-        // get point to beginning of ncol-th sub-array
-        // then use offcnt to start a bit farther down in memory lane
-        // FUDO| this should be asub (x, nlns, i, offcnt )
-        xi = asub(x, i, nlns, offcnt);
-        yi = asub(y, i, nlns, offcnt);
-        zi = asub(z, i, nlns, offcnt);
+      calculate_msd_xyz_cross ( tmp, xi, yi, zi, xj,  yj, zj, nlns, nrestart );
+      multiply_array_number_inplace ( tmp, chg[j], 1, nlns );
 
-        xj = asub(x, j, nlns, offcnt);
-        yj = asub(y, j, nlns, offcnt);
-        zj = asub(z, j, nlns, offcnt);
-
-        calculate_msd_xyz_cross ( tmp, xi, yi, zi, xj,  yj, zj, nlns_tmp );
-        multiply_array_number_inplace ( tmp, chg[j], 1, nlns_tmp );
-
-        if ( i == j ) {
-          add_arrays_inplace ( neinst, tmp, 1, nlns_tmp );
-        }
-
-        //FUX| re-introduce spatial splitting?
-        rndx = 0;
-
-        double *ptr_cc = asub(cnd_cc, nlns, rndx, 0);
-        double *ptr_ac = asub(cnd_ac, nlns, rndx, 0);
-        double *ptr_aa = asub(cnd_aa, nlns, rndx, 0);
-
-        if (chg[i] > 0)
-          add_arrays_inplace ( ptr_cc, tmp, 1, nlns_tmp );
-        else if (chg[i] < 0)
-          add_arrays_inplace ( ptr_aa, tmp, 1, nlns_tmp );
-
-        if ( chg[i] != chg[j] )
-          add_arrays_inplace ( ptr_ac, tmp, 1, nlns_tmp );
+      if ( i == j ) {
+        add_arrays_inplace ( neinst, tmp, 1, nlns );
       }
+
+      //FUX| re-introduce spatial splitting?
+      rndx = 0;
+
+      double *ptr_cc = asub(cnd_cc, nlns, rndx, 0);
+      double *ptr_ac = asub(cnd_ac, nlns, rndx, 0);
+      double *ptr_aa = asub(cnd_aa, nlns, rndx, 0);
+
+      if (chg[i] > 0)
+        add_arrays_inplace ( ptr_cc, tmp, 1, nlns );
+      else if (chg[i] < 0)
+        add_arrays_inplace ( ptr_aa, tmp, 1, nlns );
+
+      if ( chg[i] != chg[j] )
+        add_arrays_inplace ( ptr_ac, tmp, 1, nlns );
     }
 
-    printf(" %i / %i \r", (n+1), nrestart);
+    printf(" %i / %i \r", (i+1), ncol*ncol);
     fflush(stdout);
 
   }
-  printf("\n");
+
+  calculate_msd_norm( nrm, nlns, nrestart );
 
   double *ptr_nrm_ne;
   double *ptr_nrm_cc;

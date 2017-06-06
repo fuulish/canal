@@ -156,3 +156,20 @@ void add_array_number ( double *out, double *a, double f, int ncol, int nlns )
     for ( j=0; j<nlns; ++j )
       ael(out, nlns, i, j) = ael(a, nlns, i, j) + f;
 }
+
+void copy_number_to_array( double* out, double f, int ncol, int nlns )
+{
+  int i, j;
+#ifdef OPENMP
+#pragma omp parallel for default(none) \
+  private(i,j) shared(out, nlns, ncol, a, f)
+#endif
+  for ( i=0; i<ncol; ++i )
+    for ( j=0; j<nlns; ++j )
+      ael(out, nlns, i, j) = f;
+}
+
+void zero_out_array( double *out, int ncol, int nlns )
+{
+  copy_number_to_array( out, 0., ncol, nlns );
+}
