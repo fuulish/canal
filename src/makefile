@@ -22,10 +22,12 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 $(ODIR)/%.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-all: $(ODIR) canal
+all: canal
 
 canal: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+$(OBJ):	| $(ODIR)
 
 $(ODIR):
 	mkdir $(ODIR)
@@ -46,13 +48,13 @@ distclean: clean
 
 tests: normal.out split.out spatial.out
 
-normal.out: all
+normal.out: canal ../data/normal.inp
 	./canal ../data/normal.inp > normal.out
 
 check-normal: normal.out
 	diff cond_all.out ../refs/cond_all.dat
 
-split.out: all
+split.out: canal ../data/split.inp
 	./canal ../data/split.inp > split.out
 	mv cond_neinaa.out cond_neinaa_split.out
 	mv cond_neincc.out cond_neincc_split.out
@@ -67,7 +69,7 @@ check-split: split.out
 	diff cond_anicat_split.out ../refs/cond_anicat_split.dat
 	diff cond_aniani_split.out ../refs/cond_aniani_split.dat
 
-spatial.out: all
+spatial.out: canal ../data/spatial.inp
 	./canal ../data/spatial.inp > spatial.out
 	mv cond_neinaa.out cond_neinaa_spatial.out
 	mv cond_neincc.out cond_neincc_spatial.out
@@ -82,7 +84,7 @@ check-spatial: spatial.out
 	diff cond_anicat_spatial.out ../refs/cond_anicat_spatial.dat
 	diff cond_aniani_spatial.out ../refs/cond_aniani_spatial.dat
 
-elmo.out: all
+elmo.out: canal ../data/elmo.inp
 	./canal ../data/elmo.inp > elmo.out
 
 check-elmo: elmo.out
