@@ -54,13 +54,18 @@ check-normal: normal.out
 
 split.out: all
 	./canal ../data/split.inp > split.out
+	mv cond_neinaa.out cond_neinaa_split.out
+	mv cond_neincc.out cond_neincc_split.out
+	mv cond_catcat.out cond_catcat_split.out
+	mv cond_anicat.out cond_anicat_split.out
+	mv cond_aniani.out cond_aniani_split.out
 
 check-split: split.out
-	diff cond_neinaa.out ../refs/cond_neinaa.dat
-	diff cond_neincc.out ../refs/cond_neincc.dat
-	diff cond_catcat.out ../refs/cond_catcat.dat
-	diff cond_anicat.out ../refs/cond_anicat.dat
-	diff cond_aniani.out ../refs/cond_aniani.dat
+	diff cond_neinaa_split.out ../refs/cond_neinaa_split.dat
+	diff cond_neincc_split.out ../refs/cond_neincc_split.dat
+	diff cond_catcat_split.out ../refs/cond_catcat_split.dat
+	diff cond_anicat_split.out ../refs/cond_anicat_split.dat
+	diff cond_aniani_split.out ../refs/cond_aniani_split.dat
 
 spatial.out: all
 	./canal ../data/spatial.inp > spatial.out
