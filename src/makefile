@@ -56,20 +56,23 @@ split.out: all
 	./canal ../data/split.inp > split.out
 
 check-split: split.out
-	diff cond_neinst.out ../refs/cond_neinst.dat
+	diff cond_neinaa.out ../refs/cond_neinaa.dat
+	diff cond_neincc.out ../refs/cond_neincc.dat
 	diff cond_catcat.out ../refs/cond_catcat.dat
 	diff cond_anicat.out ../refs/cond_anicat.dat
 	diff cond_aniani.out ../refs/cond_aniani.dat
 
 spatial.out: all
 	./canal ../data/spatial.inp > spatial.out
-	mv cond_neinst.out cond_neinst_spatial.out
+	mv cond_neinaa.out cond_neinaa_spatial.out
+	mv cond_neincc.out cond_neincc_spatial.out
 	mv cond_catcat.out cond_catcat_spatial.out
 	mv cond_anicat.out cond_anicat_spatial.out
 	mv cond_aniani.out cond_aniani_spatial.out
 
 check-spatial: spatial.out
-	diff cond_neinst_spatial.out ../refs/cond_neinst_spatial.dat
+	diff cond_neinaa_spatial.out ../refs/cond_neinaa_spatial.dat
+	diff cond_neincc_spatial.out ../refs/cond_neincc_spatial.dat
 	diff cond_catcat_spatial.out ../refs/cond_catcat_spatial.dat
 	diff cond_anicat_spatial.out ../refs/cond_anicat_spatial.dat
 	diff cond_aniani_spatial.out ../refs/cond_aniani_spatial.dat

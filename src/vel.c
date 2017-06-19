@@ -106,7 +106,7 @@ void calculate_velocities ( double *vx, double *vy, double *vz, double *xi, doub
 }
 
 //FUDO| we shouldn't need neinst, because it'll always be 1
-void get_vflux_locl ( double *neinst, double *cnd_cc, double *cnd_ac, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell, double timestep )
+void get_vflux_locl ( double *neinaa, double *neincc, double *cnd_cc, double *cnd_ac, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell, double timestep )
 {
   int i, j, n;
   int nlns_tmp;
@@ -138,7 +138,8 @@ void get_vflux_locl ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
   //FUDO| for each kind of correlation only a distance dependence, we will average over all molecules/kinds
   nrmlen = rnum;
 
-  double  *nrm_ne = calloc(nrmlen, sizeof(double));
+  double  *nrm_na = calloc(nrmlen, sizeof(double));
+  double  *nrm_nc = calloc(nrmlen, sizeof(double));
   double  *nrm_cc = calloc(nrmlen, sizeof(double));
   double  *nrm_ac = calloc(nrmlen, sizeof(double));
   double  *nrm_aa = calloc(nrmlen, sizeof(double));
@@ -147,7 +148,8 @@ void get_vflux_locl ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
     cnd_cc[i] = 0.;
     cnd_ac[i] = 0.;
     cnd_aa[i] = 0.;
-    neinst[i] = 0.;
+    neinaa[i] = 0.;
+    neincc[i] = 0.;
   }
 
   for ( n=0; n<nlns; n++ ) {
@@ -194,8 +196,14 @@ void get_vflux_locl ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
           continue;
 
         if ( i == j ) {
-          neinst[rndx] += dot*scale;
-          nrm_ne[rndx] += scale;
+          if ( chg[i] < 0 ) {
+            neinaa[rndx] += dot*scale;
+            nrm_na[rndx] += scale;
+          }
+          else if( chg[i] > 0) {
+            neincc[rndx] += dot*scale;
+            nrm_nc[rndx] += scale;
+          }
         }
         else {
           if ( (chg[i] > 0) && (chg[j] > 0) ) {
@@ -225,20 +233,23 @@ void get_vflux_locl ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
   //FUDO| division needs to be done for all array elements
   //FUDO| problemativ if nrm == 0 somewhere, which is not unlikely
 
-  divide_array_array_inplace ( neinst, nrm_ne, 1, rnum );
+  divide_array_array_inplace ( neinaa, nrm_na, 1, rnum );
+  divide_array_array_inplace ( neincc, nrm_nc, 1, rnum );
   divide_array_array_inplace ( cnd_cc, nrm_cc, 1, rnum );
   divide_array_array_inplace ( cnd_ac, nrm_ac, 1, rnum );
   divide_array_array_inplace ( cnd_aa, nrm_aa, 1, rnum );
 
 #ifdef DEBUG
-  write_array_to_file ( "norm_neinst.out", nrm_ne, 1, rnum );
+  write_array_to_file ( "norm_neinaa.out", nrm_na, 1, rnum );
+  write_array_to_file ( "norm_neincc.out", nrm_nc, 1, rnum );
   write_array_to_file ( "norm_catcat.out", nrm_cc, 1, rnum );
   write_array_to_file ( "norm_anicat.out", nrm_ac, 1, rnum );
   write_array_to_file ( "norm_aniani.out", nrm_aa, 1, rnum );
 #endif
 
   // free (nrm_neinst);
-  free (nrm_ne);
+  free (nrm_na);
+  free (nrm_nc);
   free (nrm_cc);
   free (nrm_ac);
   free (nrm_aa);

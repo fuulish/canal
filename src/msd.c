@@ -215,7 +215,7 @@ void get_qflux_dsts ( double *cnd_cc, double *cnd_ca, double *cnd_aa, double *x,
 }
 */
 
-void get_qflux_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell )
+void get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cnd_ac, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell )
 {
   int i, j, n;
   int nlns_tmp;
@@ -248,7 +248,8 @@ void get_qflux_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
     cnd_cc[i] = 0.;
     cnd_ac[i] = 0.;
     cnd_aa[i] = 0.;
-    neinst[i] = 0.;
+    neinaa[i] = 0.;
+    neincc[i] = 0.;
   }
 
   for ( n=0; n<nrestart; ++n ){
@@ -281,7 +282,10 @@ void get_qflux_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
         multiply_array_number_inplace ( tmp, chg[i]*chg[j]*scale, 1, nlns_tmp );
 
         if ( i == j ) {
-          add_arrays_inplace ( neinst, tmp, 1, nlns_tmp );
+          if( chg[i] < 0 )
+            add_arrays_inplace ( neinaa, tmp, 1, nlns_tmp );
+          else if( chg[i] > 0 )
+            add_arrays_inplace ( neincc, tmp, 1, nlns_tmp );
         }
 
         if ( rnum > 1 ) {
@@ -325,20 +329,23 @@ void get_qflux_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
   }
   printf("\n");
 
-  double *ptr_nrm_ne;
+  double *ptr_nrm_na;
+  double *ptr_nrm_nc;
   double *ptr_nrm_cc;
   double *ptr_nrm_ac;
   double *ptr_nrm_aa;
 
   if ( rnum > 1 ) {
-    ptr_nrm_ne = nrm;
+    ptr_nrm_na = nrm;
+    ptr_nrm_nc = nrm;
     ptr_nrm_cc = nrm_catcat;
     ptr_nrm_ac = nrm_anicat;
     ptr_nrm_aa = nrm_aniani;
 
   }
   else {
-    ptr_nrm_ne = nrm;
+    ptr_nrm_na = nrm;
+    ptr_nrm_nc = nrm;
     ptr_nrm_cc = nrm;
     ptr_nrm_ac = nrm;
     ptr_nrm_aa = nrm;
@@ -346,13 +353,15 @@ void get_qflux_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
 
   //FUDO| division needs to be done for all array elements
   //FUDO| problemativ if nrm == 0 somewhere, which is not unlikely
-  divide_array_array_inplace ( neinst, ptr_nrm_ne, 1, nlns );
+  divide_array_array_inplace ( neinaa, ptr_nrm_na, 1, nlns );
+  divide_array_array_inplace ( neincc, ptr_nrm_nc, 1, nlns );
   divide_array_array_inplace ( cnd_cc, ptr_nrm_cc, 1, nlns*rnum );
   divide_array_array_inplace ( cnd_ac, ptr_nrm_ac, 1, nlns*rnum );
   divide_array_array_inplace ( cnd_aa, ptr_nrm_aa, 1, nlns*rnum );
 
 #ifdef DEBUG
-  write_array_to_file ( "norm_neinst.out", ptr_nrm_ne, 1, nlns );
+  write_array_to_file ( "norm_neinaa.out", ptr_nrm_na, 1, nlns );
+  write_array_to_file ( "norm_neincc.out", ptr_nrm_nc, 1, nlns );
   write_array_to_file ( "norm_catcat.out", ptr_nrm_cc, rnum, nlns );
   write_array_to_file ( "norm_anicat.out", ptr_nrm_ac, rnum, nlns );
   write_array_to_file ( "norm_aniani.out", ptr_nrm_aa, rnum, nlns );
@@ -369,7 +378,7 @@ void get_qflux_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
   // free (msd);
 }
 
-void get_mobil_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell )
+void get_mobil_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cnd_ac, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell )
 {
   int i, j, n;
   int nlns_tmp;
@@ -403,7 +412,8 @@ void get_mobil_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
     cnd_cc[i] = 0.;
     cnd_ac[i] = 0.;
     cnd_aa[i] = 0.;
-    neinst[i] = 0.;
+    neinaa[i] = 0.;
+    neincc[i] = 0.;
   }
 
   for ( n=0; n<nrestart; ++n ){
@@ -431,7 +441,10 @@ void get_mobil_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
         multiply_array_number_inplace ( tmp, chg[j], 1, nlns_tmp );
 
         if ( i == j ) {
-          add_arrays_inplace ( neinst, tmp, 1, nlns_tmp );
+          if( chg[i] < 0. )
+            add_arrays_inplace ( neinaa, tmp, 1, nlns_tmp );
+          else if( chg[i] > 0. )
+            add_arrays_inplace ( neincc, tmp, 1, nlns_tmp );
         }
 
         //FUX| re-introduce spatial splitting?
@@ -457,25 +470,29 @@ void get_mobil_srtd ( double *neinst, double *cnd_cc, double *cnd_ac, double *cn
   }
   printf("\n");
 
-  double *ptr_nrm_ne;
+  double *ptr_nrm_na;
+  double *ptr_nrm_nc;
   double *ptr_nrm_cc;
   double *ptr_nrm_ac;
   double *ptr_nrm_aa;
 
-  ptr_nrm_ne = nrm;
+  ptr_nrm_na = nrm;
+  ptr_nrm_nc = nrm;
   ptr_nrm_cc = nrm;
   ptr_nrm_ac = nrm;
   ptr_nrm_aa = nrm;
 
   //FUDO| division needs to be done for all array elements
   //FUDO| problemativ if nrm == 0 somewhere, which is not unlikely
-  divide_array_array_inplace ( neinst, ptr_nrm_ne, 1, nlns );
+  divide_array_array_inplace ( neinaa, ptr_nrm_na, 1, nlns );
+  divide_array_array_inplace ( neincc, ptr_nrm_nc, 1, nlns );
   divide_array_array_inplace ( cnd_cc, ptr_nrm_cc, 1, nlns*rnum );
   divide_array_array_inplace ( cnd_ac, ptr_nrm_ac, 1, nlns*rnum );
   divide_array_array_inplace ( cnd_aa, ptr_nrm_aa, 1, nlns*rnum );
 
 #ifdef DEBUG
-  write_array_to_file ( "norm_neinst.out", ptr_nrm_ne, 1, nlns );
+  write_array_to_file ( "norm_neinaa.out", ptr_nrm_na, 1, nlns );
+  write_array_to_file ( "norm_neincc.out", ptr_nrm_nc, 1, nlns );
   write_array_to_file ( "norm_catcat.out", ptr_nrm_cc, rnum, nlns );
   write_array_to_file ( "norm_anicat.out", ptr_nrm_ac, rnum, nlns );
   write_array_to_file ( "norm_aniani.out", ptr_nrm_aa, rnum, nlns );

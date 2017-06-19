@@ -113,15 +113,17 @@ int main(int argc, char *argv[]) {
 
         int arrlen = nlns * rnum;
 
-        double *qflux_neinst = (double *) calloc ( arrlen, sizeof(double));
+        double *qflux_neinaa = (double *) calloc ( arrlen, sizeof(double));
+        double *qflux_neincc = (double *) calloc ( arrlen, sizeof(double));
         double *qflux_catcat = (double *) calloc ( arrlen, sizeof(double));
         double *qflux_anicat = (double *) calloc ( arrlen, sizeof(double));
         double *qflux_aniani = (double *) calloc ( arrlen, sizeof(double));
 
-        get_qflux_srtd ( qflux_neinst, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, nrestart, dr, rstart, rnum, cell );
+        get_qflux_srtd ( qflux_neinaa, qflux_neincc, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, nrestart, dr, rstart, rnum, cell );
         // get_qflux_srtd ( qflux_neinst, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, nrestart);
 
-        write_array_to_file ( "cond_neinst.out", qflux_neinst, 1, nlns );
+        write_array_to_file ( "cond_neinaa.out", qflux_neinaa, 1, nlns );
+        write_array_to_file ( "cond_neincc.out", qflux_neincc, 1, nlns );
         write_array_to_file ( "cond_catcat.out", qflux_catcat, rnum, nlns );
         write_array_to_file ( "cond_anicat.out", qflux_anicat, rnum, nlns );
         write_array_to_file ( "cond_aniani.out", qflux_aniani, rnum, nlns );
@@ -132,8 +134,10 @@ int main(int argc, char *argv[]) {
         fitstrt = fitoffset * nlns;
         nlns_fit = fitlength * nlns;
 
-        printf("NEINST: ");
-        calculate_conductivity(&(qflux_neinst[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt);
+        printf("NEINAA: ");
+        calculate_conductivity(&(qflux_neinaa[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt);
+        printf("NEINCC: ");
+        calculate_conductivity(&(qflux_neincc[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt);
         printf("CATCAT: ");
         calculate_conductivity(&(qflux_catcat[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt);
         printf("ANIANI: ");
@@ -141,7 +145,8 @@ int main(int argc, char *argv[]) {
         printf("ANICAT: ");
         calculate_conductivity(&(qflux_anicat[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt);
 
-        free ( qflux_neinst );
+        free ( qflux_neinaa );
+        free ( qflux_neincc );
         free ( qflux_catcat );
         free ( qflux_anicat );
         free ( qflux_aniani );
@@ -171,21 +176,24 @@ int main(int argc, char *argv[]) {
       {
       int arrlen = rnum;
 
-      double *qflux_neinst = (double *) calloc ( arrlen, sizeof(double));
+      double *qflux_neinaa = (double *) calloc ( arrlen, sizeof(double));
+      double *qflux_neincc = (double *) calloc ( arrlen, sizeof(double));
       double *qflux_catcat = (double *) calloc ( arrlen, sizeof(double));
       double *qflux_anicat = (double *) calloc ( arrlen, sizeof(double));
       double *qflux_aniani = (double *) calloc ( arrlen, sizeof(double));
 
-      get_vflux_locl ( qflux_neinst, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, nrestart, dr, rstart, rnum, cell, timestep );
+      get_vflux_locl ( qflux_neinaa, qflux_neincc, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, nrestart, dr, rstart, rnum, cell, timestep );
 
-      write_array_to_file ( "velp_neinst.out", qflux_neinst, 1, rnum );
+      write_array_to_file ( "velp_neinaa.out", qflux_neinaa, 1, rnum );
+      write_array_to_file ( "velp_neincc.out", qflux_neincc, 1, rnum );
       write_array_to_file ( "velp_catcat.out", qflux_catcat, 1, rnum );
       write_array_to_file ( "velp_anicat.out", qflux_anicat, 1, rnum );
       write_array_to_file ( "velp_aniani.out", qflux_aniani, 1, rnum );
 
       printf("NUMBER OF COLUMNS: %i AND NUMBER OF LINES: %i\n", ncol, nlns);
 
-      free ( qflux_neinst );
+      free ( qflux_neinaa );
+      free ( qflux_neincc );
       free ( qflux_catcat );
       free ( qflux_anicat );
       free ( qflux_aniani );
@@ -196,14 +204,16 @@ int main(int argc, char *argv[]) {
         // check a couple of things, and maybe warn
         int arrlen = nlns * rnum;
 
-        double *qflux_neinst = (double *) calloc ( arrlen, sizeof(double));
+        double *qflux_neinaa = (double *) calloc ( arrlen, sizeof(double));
+        double *qflux_neincc = (double *) calloc ( arrlen, sizeof(double));
         double *qflux_catcat = (double *) calloc ( arrlen, sizeof(double));
         double *qflux_anicat = (double *) calloc ( arrlen, sizeof(double));
         double *qflux_aniani = (double *) calloc ( arrlen, sizeof(double));
 
-        get_mobil_srtd ( qflux_neinst, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, nrestart, dr, rstart, rnum, cell );
+        get_mobil_srtd ( qflux_neinaa, qflux_neincc, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, nrestart, dr, rstart, rnum, cell );
 
-        write_array_to_file ( "mobil_neinst.out", qflux_neinst, 1, nlns );
+        write_array_to_file ( "mobil_neinaa.out", qflux_neinaa, 1, nlns );
+        write_array_to_file ( "mobil_neincc.out", qflux_neincc, 1, nlns );
         write_array_to_file ( "mobil_catcat.out", qflux_catcat, rnum, nlns );
         write_array_to_file ( "mobil_anicat.out", qflux_anicat, rnum, nlns );
         write_array_to_file ( "mobil_aniani.out", qflux_aniani, rnum, nlns );
@@ -246,7 +256,8 @@ int main(int argc, char *argv[]) {
 
         printf("actual conductivity is: %14.8f\n", -1.*elmo_ani / avvol * nani * uniconv + 1.*elmo_cat / avvol * ncat * uniconv );
 
-        free ( qflux_neinst );
+        free ( qflux_neinaa );
+        free ( qflux_neincc );
         free ( qflux_catcat );
         free ( qflux_anicat );
         free ( qflux_aniani );
