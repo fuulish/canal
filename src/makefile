@@ -22,10 +22,12 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 $(ODIR)/%.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-all: $(ODIR) canal
+all: canal
 
 canal: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+$(OBJ):	| $(ODIR)
 
 $(ODIR):
 	mkdir $(ODIR)
