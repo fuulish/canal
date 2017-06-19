@@ -48,27 +48,31 @@ distclean: clean
 
 tests: normal.out split.out spatial.out
 
-normal.out: all
+normal.out: canal ../data/normal.inp
 	./canal ../data/normal.inp > normal.out
 
 check-normal: normal.out
 	diff cond_all.out ../refs/cond_all.dat
 
-split.out: all
+split.out: canal ../data/split.inp
 	./canal ../data/split.inp > split.out
+	cp cond_neinst.out cond_neinst_split.out
+	cp cond_catcat.out cond_catcat_split.out
+	cp cond_anicat.out cond_anicat_split.out
+	cp cond_aniani.out cond_aniani_split.out
 
 check-split: split.out
-	diff cond_neinst.out ../refs/cond_neinst.dat
-	diff cond_catcat.out ../refs/cond_catcat.dat
-	diff cond_anicat.out ../refs/cond_anicat.dat
-	diff cond_aniani.out ../refs/cond_aniani.dat
+	diff cond_neinst_split.out ../refs/cond_neinst.dat
+	diff cond_catcat_split.out ../refs/cond_catcat.dat
+	diff cond_anicat_split.out ../refs/cond_anicat.dat
+	diff cond_aniani_split.out ../refs/cond_aniani.dat
 
-spatial.out: all
+spatial.out: canal ../data/spatial.inp
 	./canal ../data/spatial.inp > spatial.out
-	mv cond_neinst.out cond_neinst_spatial.out
-	mv cond_catcat.out cond_catcat_spatial.out
-	mv cond_anicat.out cond_anicat_spatial.out
-	mv cond_aniani.out cond_aniani_spatial.out
+	cp cond_neinst.out cond_neinst_spatial.out
+	cp cond_catcat.out cond_catcat_spatial.out
+	cp cond_anicat.out cond_anicat_spatial.out
+	cp cond_aniani.out cond_aniani_spatial.out
 
 check-spatial: spatial.out
 	diff cond_neinst_spatial.out ../refs/cond_neinst_spatial.dat
@@ -76,7 +80,7 @@ check-spatial: spatial.out
 	diff cond_anicat_spatial.out ../refs/cond_anicat_spatial.dat
 	diff cond_aniani_spatial.out ../refs/cond_aniani_spatial.dat
 
-elmo.out: all
+elmo.out: canal ../data/elmo.inp
 	./canal ../data/elmo.inp > elmo.out
 
 check-elmo: elmo.out
