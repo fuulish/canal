@@ -286,40 +286,46 @@ void get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cn
             add_arrays_inplace ( neinaa, tmp, 1, nlns_tmp );
           else if( chg[i] > 0 )
             add_arrays_inplace ( neincc, tmp, 1, nlns_tmp );
-        }
 
-        if ( rnum > 1 ) {
-          dst = get_distance_periodic(xi[0], yi[0], zi[0], xj[0], yj[0], zj[0], cell[offcnt]);
-
-          if ( dst >= rstart )
-            rndx = (int) floor ( ( dst - rstart ) / dr );
-          else
-            rndx = 0;
-
-          if ( rndx >= rnum )
-            continue;
-
-          if ( (chg[i] > 0) && (chg[j] > 0) )
-            add_array_number_inplace ( asub(nrm_catcat, nlns, rndx, 0), 1., 1, nlns_tmp );
-          else if ( (chg[i] < 0) && (chg[j] < 0) )
-            add_array_number_inplace ( asub(nrm_aniani, nlns, rndx, 0), 1., 1, nlns_tmp );
-          else
-            add_array_number_inplace ( asub(nrm_anicat, nlns, rndx, 0), 1., 1, nlns_tmp );
-
-        }
-        else
           rndx = 0;
 
-        double *ptr_cc = asub(cnd_cc, nlns, rndx, 0);
-        double *ptr_ac = asub(cnd_ac, nlns, rndx, 0);
-        double *ptr_aa = asub(cnd_aa, nlns, rndx, 0);
+        } else {
+          if ( rnum > 1 ) {
+            dst = get_distance_periodic(xi[0], yi[0], zi[0], xj[0], yj[0], zj[0], cell[offcnt]);
 
-        if ( (chg[i] > 0) && (chg[j] > 0) )
-          add_arrays_inplace ( ptr_cc, tmp, 1, nlns_tmp );
-        else if ( (chg[i] < 0) && (chg[j] < 0) )
-          add_arrays_inplace ( ptr_aa, tmp, 1, nlns_tmp );
-        else
-          add_arrays_inplace ( ptr_ac, tmp, 1, nlns_tmp );
+            if ( dst >= rstart )
+              rndx = (int) floor ( ( dst - rstart ) / dr );
+            else
+              rndx = 0;
+
+            if ( rndx >= rnum )
+              continue;
+
+            if ( (chg[i] > 0) && (chg[j] > 0) )
+              add_array_number_inplace ( asub(nrm_catcat, nlns, rndx, 0), 1., 1, nlns_tmp );
+            else if ( (chg[i] < 0) && (chg[j] < 0) )
+              add_array_number_inplace ( asub(nrm_aniani, nlns, rndx, 0), 1., 1, nlns_tmp );
+            else
+              add_array_number_inplace ( asub(nrm_anicat, nlns, rndx, 0), 1., 1, nlns_tmp );
+
+          }
+          else {
+            rndx = 0;
+
+            double *ptr_cc = asub(cnd_cc, nlns, rndx, 0);
+            double *ptr_ac = asub(cnd_ac, nlns, rndx, 0);
+            double *ptr_aa = asub(cnd_aa, nlns, rndx, 0);
+
+            if ( (chg[i] > 0) && (chg[j] > 0) )
+              add_arrays_inplace ( ptr_cc, tmp, 1, nlns_tmp );
+            else if ( (chg[i] < 0) && (chg[j] < 0) )
+              add_arrays_inplace ( ptr_aa, tmp, 1, nlns_tmp );
+            else
+              add_arrays_inplace ( ptr_ac, tmp, 1, nlns_tmp );
+
+          }
+        }
+
       }
     }
 
