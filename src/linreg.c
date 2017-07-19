@@ -27,8 +27,10 @@ along with canal.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <math.h>
 #include <gsl/gsl_fit.h>
+#include <gsl/gsl_cdf.h>
+// #include <gsl/gsl_randist.h>
 
-int get_linear_regression(size_t n, const double x[], const double y[], double* m, double* b, double* r)
+double get_linear_regression(size_t n, const double x[], const double y[], double* m, double* b, double* r)
 {
   size_t xstride = 1;
   size_t ystride = 1;
@@ -37,7 +39,20 @@ int get_linear_regression(size_t n, const double x[], const double y[], double* 
 
   int ret = gsl_fit_linear (x, xstride, y, ystride, n, b, m, &cov00, &cov01, &cov11, &sumsq);
 
-  return ret;
+  // printf("CHISQ: %e, M: %e +/- %e, B: %e +/- %e\n", sumsq, *m, sqrt(cov11), *b, sqrt(cov00));
+
+  // double stdev0=sqrt(cov00);
+  // double t0=*b/stdev0;
+  // double pv0=t0<0?2*(1-gsl_cdf_tdist_P(-t0,n-2)):2*(1-gsl_cdf_tdist_P(t0,n-2));//This is the p-value of the constant term
+  // cout<<"Intercept\t"<<*b<<"\t"<<stdev0<<"\t"<<t0<<"\t"<<pv0<<endl;
+
+  double stdev1=sqrt(cov11);
+  // double t1=*m/stdev1;
+  // double pv1=t1<0?2*(1-gsl_cdf_tdist_P(-t1,n-2)):2*(1-gsl_cdf_tdist_P(t1,n-2));//This is the p-value of the linear term
+  // cout<<"x\t"<<*m<<"\t"<<stdev1<<"\t"<<t1<<"\t"<<pv1<<endl;
+
+  return stdev1;
+  // return pv1;
 }
 
 double calculate_conductivity ( double *data, size_t len, double temp, double vol, double timestep, int fitstrt, char *outprefix, char *units )
@@ -49,7 +64,7 @@ double calculate_conductivity ( double *data, size_t len, double temp, double vo
   for ( i=0; i<len; ++i )
     time[i] = (i + fitstrt) * timestep;
 
-  get_linear_regression(len, time, data, &m, &b, &r);
+  double cond_err = get_linear_regression(len, time, data, &m, &b, &r);
 
   cond = m / (6. * vol * KBOLTZ * temp );
   cond *= E2C*E2C / A2M / FS2S;
@@ -67,8 +82,12 @@ double calculate_conductivity ( double *data, size_t len, double temp, double vo
   cond2 = m2 / (6. * vol * KBOLTZ * temp );
   cond2 *= E2C*E2C / A2M / FS2S;
 
+  cond_err /= (6. * vol * KBOLTZ * temp );
+  cond_err *= E2C*E2C / A2M / FS2S;
+
   printf("FIT PARAMETER: %14.8f %14.8f\n", m, b);
-  printf("%s: %e +/- %14.8f %s\n", outprefix, cond, fabs(cond2-cond1), units);
+  printf("%s: %e +/- %e %s\n", outprefix, cond, cond_err, units);
+  // printf("%s: %e +/- %14.8f %s\n", outprefix, cond, fabs(cond2-cond1), units);
   // printf("CONDUCTIVITY IS: %14.8f +/- %14.8f S/m\n", cond, fabs(cond2-cond1));
 
   free( time );

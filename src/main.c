@@ -282,7 +282,8 @@ int main(int argc, char *argv[]) {
       nlns_fit = fitlength * nlns;
 
       // first terms counter-acting conductivity stuff, last term units conversion angstrom^2/fs -> m^2/s
-      double uniconv = E2C*E2C / A2M / FS2S / KBOLTZ * 1.e5;
+      //double uniconv = E2C*E2C / A2M / FS2S / KBOLTZ * 1.e5;
+      double uniconv = E2C*E2C / A2M / FS2S / KBOLTZ * 1.e1;
 
       int i;
       int ncat = 0;
@@ -297,9 +298,9 @@ int main(int argc, char *argv[]) {
       }
 
       printf("NEINAA: ");
-      calculate_conductivity(&(qflux_neinaa[fitstrt]), nlns_fit, nani, uniconv, timestep, fitstrt, "DIFFUSION IS:", "m^2/s");
+      calculate_conductivity(&(qflux_neinaa[fitstrt]), nlns_fit, nani, uniconv, timestep, fitstrt, "DIFFUSION IS:", "cm^2/s");
       printf("NEINCC: ");
-      calculate_conductivity(&(qflux_neincc[fitstrt]), nlns_fit, ncat, uniconv, timestep, fitstrt, "DIFFUSION IS:", "m^2/s");
+      calculate_conductivity(&(qflux_neincc[fitstrt]), nlns_fit, ncat, uniconv, timestep, fitstrt, "DIFFUSION IS:", "cm^2/s");
 
       free ( qflux_neinaa );
       free ( qflux_neincc );
