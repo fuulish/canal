@@ -514,3 +514,79 @@ void get_mobil_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cn
 
   // free (msd);
 }
+
+void get_diff ( double *neinaa, double *neincc, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell )
+{
+  int i, n;
+  int nlns_tmp;
+  int offcnt;
+
+  double *xi, *yi, *zi;
+
+  int offset = nlns / nrestart;
+
+  double *tmp = (double *) malloc ( nlns * sizeof(double));
+  double *nrm = (double *) calloc ( nlns, sizeof(double));
+
+  // double *msd = (double *) calloc ( nlns, sizeof(double));
+
+  nlns_tmp = nlns*rnum;
+
+  // for savety reason assume the worst, i.e., conductivity/output array has not been initialized properly
+  for ( i=0; i<nlns; ++i ) {
+    neinaa[i] = 0.;
+    neincc[i] = 0.;
+  }
+
+  for ( n=0; n<nrestart; ++n ){
+
+    offcnt = n*offset;
+    nlns_tmp = nlns - offcnt;
+    add_array_number_inplace ( nrm, 1., 1, nlns_tmp );
+
+    // different molecules
+    for ( i=0; i<ncol; ++i ) {
+
+      // get point to beginning of ncol-th sub-array
+      // then use offcnt to start a bit farther down in memory lane
+      // FUDO| this should be asub (x, nlns, i, offcnt )
+      xi = asub(x, i, nlns, offcnt);
+      yi = asub(y, i, nlns, offcnt);
+      zi = asub(z, i, nlns, offcnt);
+
+      calculate_msd_xyz ( tmp, xi, yi, zi, nlns_tmp );
+
+      if( chg[i] < 0 )
+        add_arrays_inplace ( neinaa, tmp, 1, nlns_tmp );
+      else if( chg[i] > 0 )
+        add_arrays_inplace ( neincc, tmp, 1, nlns_tmp );
+
+    }
+
+    printf(" %i / %i \r", (n+1), nrestart);
+    fflush(stdout);
+
+  }
+  printf("\n");
+
+  double *ptr_nrm_na;
+  double *ptr_nrm_nc;
+
+  ptr_nrm_na = nrm;
+  ptr_nrm_nc = nrm;
+
+  //FUDO| division needs to be done for all array elements
+  //FUDO| problemativ if nrm == 0 somewhere, which is not unlikely
+  divide_array_array_inplace ( neinaa, ptr_nrm_na, 1, nlns );
+  divide_array_array_inplace ( neincc, ptr_nrm_nc, 1, nlns );
+
+#ifdef DEBUG
+  write_array_to_file ( "norm_neinaa.out", ptr_nrm_na, 1, nlns );
+  write_array_to_file ( "norm_neincc.out", ptr_nrm_nc, 1, nlns );
+#endif
+
+  free (tmp);
+  free (nrm);
+
+  // free (msd);
+}

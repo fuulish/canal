@@ -24,6 +24,7 @@ enum tasks_e {
   COND,
   VELP,
   ELMO,
+  DIFF,
 };
 
 int analyze_file ( char *fname, int *ncol, int *nlns, char *delim);

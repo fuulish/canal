@@ -40,7 +40,7 @@ int get_linear_regression(size_t n, const double x[], const double y[], double* 
   return ret;
 }
 
-double calculate_conductivity ( double *data, size_t len, double temp, double vol, double timestep, int fitstrt )
+double calculate_conductivity ( double *data, size_t len, double temp, double vol, double timestep, int fitstrt, char *outprefix, char *units )
 {
   int i;
   double m, b, r, cond;
@@ -68,7 +68,7 @@ double calculate_conductivity ( double *data, size_t len, double temp, double vo
   cond2 *= E2C*E2C / A2M / FS2S;
 
   printf("FIT PARAMETER: %14.8f %14.8f\n", m, b);
-  printf("CONDUCTIVITY IS: %e +/- %14.8f S/m\n", cond, fabs(cond2-cond1));
+  printf("%s: %e +/- %14.8f %s\n", outprefix, cond, fabs(cond2-cond1), units);
   // printf("CONDUCTIVITY IS: %14.8f +/- %14.8f S/m\n", cond, fabs(cond2-cond1));
 
   free( time );

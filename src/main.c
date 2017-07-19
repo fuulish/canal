@@ -135,15 +135,15 @@ int main(int argc, char *argv[]) {
         nlns_fit = fitlength * nlns;
 
         printf("NEINAA: ");
-        calculate_conductivity(&(qflux_neinaa[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt);
+        calculate_conductivity(&(qflux_neinaa[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt, "CONDUCTIVITY IS:", "S/m");
         printf("NEINCC: ");
-        calculate_conductivity(&(qflux_neincc[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt);
+        calculate_conductivity(&(qflux_neincc[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt, "CONDUCTIVITY IS:", "S/m");
         printf("CATCAT: ");
-        calculate_conductivity(&(qflux_catcat[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt);
+        calculate_conductivity(&(qflux_catcat[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt, "CONDUCTIVITY IS:", "S/m");
         printf("ANIANI: ");
-        calculate_conductivity(&(qflux_aniani[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt);
+        calculate_conductivity(&(qflux_aniani[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt, "CONDUCTIVITY IS:", "S/m");
         printf("ANICAT: ");
-        calculate_conductivity(&(qflux_anicat[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt);
+        calculate_conductivity(&(qflux_anicat[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt, "CONDUCTIVITY IS:", "S/m");
 
         free ( qflux_neinaa );
         free ( qflux_neincc );
@@ -162,7 +162,7 @@ int main(int argc, char *argv[]) {
         printf("NLNS_FIT: %i %i %i\n", nlns_fit, nlns, fitstrt);
 
         printf("FULL: ");
-        calculate_conductivity(&(qflux[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt);
+        calculate_conductivity(&(qflux[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt, "CONDUCTIVITY IS:", "S/m");
 
         write_array_to_file ( "cond_all.out", qflux, 1, nlns );
 
@@ -248,11 +248,11 @@ int main(int argc, char *argv[]) {
         // printf("NEINST: ");
         // calculate_conductivity(&(qflux_neinst[fitstrt]), nlns_fit, temp, ntot*uniconv, timestep, fitstrt);
         printf("CATCAT: ");
-        elmo_cat = calculate_conductivity(&(qflux_catcat[fitstrt]), nlns_fit, temp, ncat*uniconv, timestep, fitstrt);
+        elmo_cat = calculate_conductivity(&(qflux_catcat[fitstrt]), nlns_fit, temp, ncat*uniconv, timestep, fitstrt, "MOBILITY IS:", "m^2/Vs");
         printf("ANIANI: ");
-        elmo_ani = calculate_conductivity(&(qflux_aniani[fitstrt]), nlns_fit, temp, nani*uniconv, timestep, fitstrt);
+        elmo_ani = calculate_conductivity(&(qflux_aniani[fitstrt]), nlns_fit, temp, nani*uniconv, timestep, fitstrt, "MOBILITY IS:", "m^2/Vs");
         // printf("ANICAT: ");
-        // calculate_conductivity(&(qflux_anicat[fitstrt]), nlns_fit, temp, ntot*uniconv, timestep, fitstrt);
+        // calculate_conductivity(&(qflux_anicat[fitstrt]), nlns_fit, temp, ntot*uniconv, timestep, fitstrt, "MOBILITY IS:", "m^2/Vs");
 
         printf("actual conductivity is: %14.8f\n", -1.*elmo_ani / avvol * nani * uniconv + 1.*elmo_cat / avvol * ncat * uniconv );
 
@@ -261,6 +261,48 @@ int main(int argc, char *argv[]) {
         free ( qflux_catcat );
         free ( qflux_anicat );
         free ( qflux_aniani );
+      }
+      break;
+    case DIFF:
+      {
+      int arrlen = nlns * rnum;
+
+      double *qflux_neinaa = (double *) calloc ( arrlen, sizeof(double));
+      double *qflux_neincc = (double *) calloc ( arrlen, sizeof(double));
+
+      get_diff ( qflux_neinaa, qflux_neincc, xcom, ycom, zcom, chgs, ncol, nlns, nrestart, dr, rstart, rnum, cell);
+
+      write_array_to_file ( "diff_neinaa.out", qflux_neinaa, 1, nlns );
+      write_array_to_file ( "diff_neincc.out", qflux_neincc, 1, nlns );
+
+      printf("NUMBER OF COLUMNS: %i AND NUMBER OF LINES: %i\n", ncol, nlns);
+
+      int fitstrt, nlns_fit;
+      fitstrt = fitoffset * nlns;
+      nlns_fit = fitlength * nlns;
+
+      // first terms counter-acting conductivity stuff, last term units conversion angstrom^2/fs -> m^2/s
+      double uniconv = E2C*E2C / A2M / FS2S / KBOLTZ * 1.e5;
+
+      int i;
+      int ncat = 0;
+      int nani = 0;
+      // int ntot = 0;
+
+      for ( i=0; i<ncol; ++i ) {
+        if( chgs[i] < 0 )
+          nani += 1;
+        else if( chgs[i] > 0 )
+          ncat += 1;
+      }
+
+      printf("NEINAA: ");
+      calculate_conductivity(&(qflux_neinaa[fitstrt]), nlns_fit, nani, uniconv, timestep, fitstrt, "DIFFUSION IS:", "m^2/s");
+      printf("NEINCC: ");
+      calculate_conductivity(&(qflux_neincc[fitstrt]), nlns_fit, ncat, uniconv, timestep, fitstrt, "DIFFUSION IS:", "m^2/s");
+
+      free ( qflux_neinaa );
+      free ( qflux_neincc );
       }
       break;
     default:
