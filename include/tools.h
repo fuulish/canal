@@ -29,6 +29,7 @@ void multiply_array_number_inplace (double * restrict out, double f, int ncol, i
 void add_array_number ( double * restrict out, double * restrict a, double f, int ncol, int nlns );
 void add_array_number_inplace ( double * restrict out, double f, int ncol, int nlns );
 void subtract_array_number ( double * restrict out, double * restrict a, double f, int ncol, int nlns );
+void subtract_array_number_inplace ( double * restrict out, double f, int ncol, int nlns );
 void add_array_array ( double * restrict out, double * restrict a, double * restrict b, int ncol, int nlns );
 void add_arrays_inplace ( double * restrict b, double * restrict a, int ncol, int nlns );
 void divide_array_array ( double * restrict out, double * restrict a, double * restrict b, int ncol, int nlns );

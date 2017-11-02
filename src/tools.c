@@ -102,18 +102,13 @@ void multiply_array_array ( double * restrict out, double * restrict a, double *
 
 void divide_array_number ( double * restrict out, double * restrict a, double f, int ncol, int nlns )
 {
-  int i, j;
-
-  for ( i=0; i<ncol; ++i )
-    for ( j=0; j<nlns; ++j )
-      ael(out, nlns, i, j) = ael(a, nlns, i, j) / f;
+  multiply_array_number( out, a, 1./f, ncol, nlns );
 }
 
 void divide_array_number_inplace (double * restrict out, double f, int ncol, int nlns)
 {
   multiply_array_number_inplace ( out, 1./f, ncol, nlns );
 }
-
 
 void multiply_array_number ( double * restrict out, double * restrict a, double f, int ncol, int nlns )
 {
@@ -137,6 +132,12 @@ void subtract_array_number ( double * restrict out, double * restrict a, double 
 {
   add_array_number ( out, a, -f, ncol, nlns );
 }
+
+void subtract_array_number_inplace ( double * restrict out, double f, int ncol, int nlns )
+{
+  add_array_number_inplace( out, -f, ncol, nlns );
+}
+
 void add_array_number_inplace ( double * restrict out, double f, int ncol, int nlns )
 {
   int i, j;
