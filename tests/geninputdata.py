@@ -22,4 +22,17 @@ for i, c in zip(range(3), ['x', 'y', 'z']):
 
     np.savetxt('%scom.dat' %c, xyzp, fmt='%7.1f')
 
+chg = open('charges.dat', 'w')
+
+for n in range(nmol/2):
+    chg.write(' 1.\n')
+
+for n in range(nmol/2):
+    chg.write('-1.\n')
+
+chg.close()
+
+cell = np.ones(ntimesteps)*ntimesteps*10
+np.savetxt('cell.dat', cell)
+
 print xyzp

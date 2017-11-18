@@ -1,0 +1,12 @@
+nrestart = 1000
+spatial = 1 0 0
+temp =  1
+avvol = 1
+timestep = 1
+split = 1
+xcom = xcom.dat
+ycom = ycom.dat
+zcom = zcom.dat
+cell = cell.dat
+chgs = charges.dat
+task = cond
