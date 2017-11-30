@@ -298,6 +298,15 @@ void get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cn
   divide_array_array_inplace ( cnd_ac, ptr_nrm_ac, 1, nlns*rmax );
   divide_array_array_inplace ( cnd_aa, ptr_nrm_aa, 1, nlns*rmax );
 
+#ifdef VERIFY
+  /* approximately accurate re-normalization to recover total conductivity */
+  for( i=0; i<rmax; ++i ) {
+    divide_array_number_inplace ( asub( cnd_cc, nlns, i, 0 ), ptr_nrm_cc[nlns*i]/nrestart, 1, nlns );
+    divide_array_number_inplace ( asub( cnd_ac, nlns, i, 0 ), ptr_nrm_ac[nlns*i]/nrestart, 1, nlns );
+    divide_array_number_inplace ( asub( cnd_aa, nlns, i, 0 ), ptr_nrm_aa[nlns*i]/nrestart, 1, nlns );
+  }
+#endif
+
 #ifdef DEBUG
   write_array_to_file ( "norm_neinaa.out", ptr_nrm_na, 1, nlns );
   write_array_to_file ( "norm_neincc.out", ptr_nrm_nc, 1, nlns );
