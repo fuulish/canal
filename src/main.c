@@ -141,6 +141,16 @@ int main(int argc, char *argv[]) {
           sum_array_rnum( qflux_catcat, rnum, nlns );
           sum_array_rnum( qflux_aniani, rnum, nlns );
           sum_array_rnum( qflux_anicat, rnum, nlns );
+
+          // int ncat, nani;
+          // get_number_of_cations_anions( &ncat, &nani, chgs, ncol );
+          // 
+          // printf("NCAT %i NANI %i\n", ncat, nani);
+
+          // multiply_array_number_inplace( qflux_catcat, ncat*ncat, 1, nlns );
+          // multiply_array_number_inplace( qflux_aniani, nani*nani, 1, nlns );
+          // multiply_array_number_inplace( qflux_anicat, ncat*nani, 1, nlns );
+
         }
 
         write_array_to_file ( "cond_neinaa_sum.out", qflux_neinaa, 1, nlns );
@@ -242,17 +252,8 @@ int main(int argc, char *argv[]) {
         //FUX| for now we'll make use of the conductivity calculation, which is essentially the same, except a couple of pre-factors
         //FUX| we use (E2C * NCHG / A2M^3) instead of the volume, need to count anions and cations
 
-        int i;
-        int ncat = 0;
-        int nani = 0;
-        // int ntot = 0;
-
-        for ( i=0; i<ncol; ++i ) {
-          if( chgs[i] < 0 )
-            nani += 1;
-          else if( chgs[i] > 0 )
-            ncat += 1;
-        }
+        int ncat, nani;
+        get_number_of_cations_anions( &ncat, &nani, chgs, ncol );
 
         // ntot = nani + ncat;
         double uniconv = E2C / (A2M * A2M * A2M);

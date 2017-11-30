@@ -164,3 +164,18 @@ void sum_array_rnum( double *out, int rnum, int nlns )
   for( i=1; i<rnum; ++i )
     add_arrays_inplace( out, asub( out, nlns, i, 0 ), 1, nlns );
 }
+
+void get_number_of_cations_anions( int *ncat, int *nani, double *chgs, int ncol )
+{
+  int i;
+  *ncat = 0;
+  *nani = 0;
+  // int ntot = 0;
+
+  for ( i=0; i<ncol; ++i ) {
+    if( chgs[i] < 0 )
+      *nani += 1;
+    else if( chgs[i] > 0 )
+      *ncat += 1;
+  }
+}
