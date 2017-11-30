@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
         double *qflux_anicat = (double *) calloc ( arrlen, sizeof(double));
         double *qflux_aniani = (double *) calloc ( arrlen, sizeof(double));
 
-        get_qflux_srtd ( qflux_neinaa, qflux_neincc, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, nrestart, dr, rstart, rnum, cell );
+        int rmax = get_qflux_srtd ( qflux_neinaa, qflux_neincc, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, nrestart, dr, rstart, rnum, cell );
         // get_qflux_srtd ( qflux_neinst, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nlns, nrestart);
 
         write_array_to_file ( "cond_neinaa.out", qflux_neinaa, 1, nlns );
@@ -147,9 +147,11 @@ int main(int argc, char *argv[]) {
           // 
           // printf("NCAT %i NANI %i\n", ncat, nani);
 
-          // multiply_array_number_inplace( qflux_catcat, ncat*ncat, 1, nlns );
-          // multiply_array_number_inplace( qflux_aniani, nani*nani, 1, nlns );
-          // multiply_array_number_inplace( qflux_anicat, ncat*nani, 1, nlns );
+          // multiply_array_number_inplace( qflux_neinaa, 1., 1, nlns );
+          // multiply_array_number_inplace( qflux_neincc, 1., 1, nlns );
+          // multiply_array_number_inplace( qflux_catcat, 1./rmax, 1, nlns );
+          // multiply_array_number_inplace( qflux_aniani, 1./rmax, 1, nlns );
+          // multiply_array_number_inplace( qflux_anicat, 1./rmax, 1, nlns );
 
         }
 

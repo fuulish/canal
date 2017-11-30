@@ -148,13 +148,13 @@ void get_qflux ( double *cnd, double *x, double *y, double *z, double *chg, int 
   // free (msd);
 }
 
-void get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cnd_ac, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell )
+int get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cnd_ac, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell )
 {
   int i, j, n;
   int nlns_tmp;
   int offcnt;
   int rndx;
-  int rmax = 1;
+  int rmax = 0;
 
   double scale;
   double *xi, *yi, *zi, *xj, *yj, *zj;
@@ -169,6 +169,8 @@ void get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cn
   int arrlen = nlns * rnum;
 
   // double *nrm_neinst = (double *) calloc ( arrlen, sizeof(double));
+  double *nrm_neinaa = (double *) calloc ( arrlen, sizeof(double));
+  double *nrm_neincc = (double *) calloc ( arrlen, sizeof(double));
   double *nrm_catcat = (double *) calloc ( arrlen, sizeof(double));
   double *nrm_anicat = (double *) calloc ( arrlen, sizeof(double));
   double *nrm_aniani = (double *) calloc ( arrlen, sizeof(double));
@@ -213,10 +215,14 @@ void get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cn
         multiply_array_number_inplace ( tmp, chg[i]*chg[j]*scale, 1, nlns_tmp );
 
         if ( i == j ) {
-          if( chg[i] < 0 )
+          if( chg[i] < 0 ) {
             add_arrays_inplace ( neinaa, tmp, 1, nlns_tmp );
-          else if( chg[i] > 0 )
+            add_array_number_inplace ( nrm_neinaa, 1., 1, nlns_tmp );
+          }
+          else if( chg[i] > 0 ) {
             add_arrays_inplace ( neincc, tmp, 1, nlns_tmp );
+            add_array_number_inplace ( nrm_neincc, 1., 1, nlns_tmp );
+          }
 
           rndx = 0;
 
@@ -268,6 +274,8 @@ void get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cn
   }
   printf("\n");
 
+  rmax += 1;
+
   double *ptr_nrm_na;
   double *ptr_nrm_nc;
   double *ptr_nrm_cc;
@@ -277,6 +285,8 @@ void get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cn
   if ( rnum > 1 ) {
     ptr_nrm_na = nrm;
     ptr_nrm_nc = nrm;
+    // ptr_nrm_na = nrm_neinaa;
+    // ptr_nrm_nc = nrm_neincc;
     ptr_nrm_cc = nrm_catcat;
     ptr_nrm_ac = nrm_anicat;
     ptr_nrm_aa = nrm_aniani;
@@ -298,7 +308,7 @@ void get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cn
   divide_array_array_inplace ( cnd_ac, ptr_nrm_ac, 1, nlns*rmax );
   divide_array_array_inplace ( cnd_aa, ptr_nrm_aa, 1, nlns*rmax );
 
-#ifdef VERIFY
+#ifndef STRICT
   /* approximately accurate re-normalization to recover total conductivity */
   for( i=0; i<rmax; ++i ) {
     divide_array_number_inplace ( asub( cnd_cc, nlns, i, 0 ), ptr_nrm_cc[nlns*i]/nrestart, 1, nlns );
@@ -316,12 +326,16 @@ void get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cn
 #endif
 
   // free (nrm_neinst);
+  free (nrm_neinaa);
+  free (nrm_neincc);
   free (nrm_catcat);
   free (nrm_anicat);
   free (nrm_aniani);
 
   free (tmp);
   free (nrm);
+
+  return rmax;
 
   // free (msd);
 }
