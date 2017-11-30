@@ -241,19 +241,18 @@ void get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cn
           }
           else {
             rndx = 0;
-
-            double *ptr_cc = asub(cnd_cc, nlns, rndx, 0);
-            double *ptr_ac = asub(cnd_ac, nlns, rndx, 0);
-            double *ptr_aa = asub(cnd_aa, nlns, rndx, 0);
-
-            if ( (chg[i] > 0) && (chg[j] > 0) )
-              add_arrays_inplace ( ptr_cc, tmp, 1, nlns_tmp );
-            else if ( (chg[i] < 0) && (chg[j] < 0) )
-              add_arrays_inplace ( ptr_aa, tmp, 1, nlns_tmp );
-            else
-              add_arrays_inplace ( ptr_ac, tmp, 1, nlns_tmp );
-
           }
+
+          double *ptr_cc = asub(cnd_cc, nlns, rndx, 0);
+          double *ptr_ac = asub(cnd_ac, nlns, rndx, 0);
+          double *ptr_aa = asub(cnd_aa, nlns, rndx, 0);
+
+          if ( (chg[i] > 0) && (chg[j] > 0) )
+            add_arrays_inplace ( ptr_cc, tmp, 1, nlns_tmp );
+          else if ( (chg[i] < 0) && (chg[j] < 0) )
+            add_arrays_inplace ( ptr_aa, tmp, 1, nlns_tmp );
+          else
+            add_arrays_inplace ( ptr_ac, tmp, 1, nlns_tmp );
         }
 
       }
