@@ -200,16 +200,13 @@ void get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cn
         else
           scale = 2.;
 
-        // get point to beginning of ncol-th sub-array
-        // then use offcnt to start a bit farther down in memory lane
-        // FUDO| this should be asub (x, nlns, i, offcnt )
-        xi = asub(x, i, nlns, offcnt);
-        yi = asub(y, i, nlns, offcnt);
-        zi = asub(z, i, nlns, offcnt);
+        xi = asub(x, nlns, i, offcnt);
+        yi = asub(y, nlns, i, offcnt);
+        zi = asub(z, nlns, i, offcnt);
 
-        xj = asub(x, j, nlns, offcnt);
-        yj = asub(y, j, nlns, offcnt);
-        zj = asub(z, j, nlns, offcnt);
+        xj = asub(x, nlns, j, offcnt);
+        yj = asub(y, nlns, j, offcnt);
+        zj = asub(z, nlns, j, offcnt);
 
         calculate_msd_xyz_cross ( tmp, xi, yi, zi, xj,  yj, zj, nlns_tmp );
         multiply_array_number_inplace ( tmp, chg[i]*chg[j]*scale, 1, nlns_tmp );
