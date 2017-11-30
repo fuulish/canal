@@ -154,6 +154,7 @@ void get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cn
   int nlns_tmp;
   int offcnt;
   int rndx;
+  int rmax = 1;
 
   double scale;
   double *xi, *yi, *zi, *xj, *yj, *zj;
@@ -231,6 +232,9 @@ void get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cn
             if ( rndx >= rnum )
               continue;
 
+            if( rndx > rmax )
+              rmax = rndx;
+
             if ( (chg[i] > 0) && (chg[j] > 0) )
               add_array_number_inplace ( asub(nrm_catcat, nlns, rndx, 0), 1., 1, nlns_tmp );
             else if ( (chg[i] < 0) && (chg[j] < 0) )
@@ -290,9 +294,9 @@ void get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cn
   //FUDO| problemativ if nrm == 0 somewhere, which is not unlikely
   divide_array_array_inplace ( neinaa, ptr_nrm_na, 1, nlns );
   divide_array_array_inplace ( neincc, ptr_nrm_nc, 1, nlns );
-  divide_array_array_inplace ( cnd_cc, ptr_nrm_cc, 1, nlns*rnum );
-  divide_array_array_inplace ( cnd_ac, ptr_nrm_ac, 1, nlns*rnum );
-  divide_array_array_inplace ( cnd_aa, ptr_nrm_aa, 1, nlns*rnum );
+  divide_array_array_inplace ( cnd_cc, ptr_nrm_cc, 1, nlns*rmax );
+  divide_array_array_inplace ( cnd_ac, ptr_nrm_ac, 1, nlns*rmax );
+  divide_array_array_inplace ( cnd_aa, ptr_nrm_aa, 1, nlns*rmax );
 
 #ifdef DEBUG
   write_array_to_file ( "norm_neinaa.out", ptr_nrm_na, 1, nlns );

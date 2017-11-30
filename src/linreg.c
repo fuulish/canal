@@ -74,11 +74,11 @@ double calculate_conductivity ( double *data, size_t len, double temp, double vo
 
   free( time );
 
-#ifdef DEBUG
-  multiply_array_number_inplace ( time, m, 1, len );
-  add_array_number_inplace ( time, b, 1, len );
-  write_array_to_file ( "fit_cond.out", time, 1, len );
-#endif
+// #ifdef DEBUG
+//   multiply_array_number_inplace ( time, m, 1, len );
+//   add_array_number_inplace ( time, b, 1, len );
+//   write_array_to_file ( "fit_cond.out", time, 1, len );
+// #endif
 
   return cond;
 }

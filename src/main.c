@@ -29,6 +29,7 @@ along with canal.  If not, see <http://www.gnu.org/licenses/>.
 #include "vel.h"
 #include "constants.h"
 #include "linreg.h"
+#include "tools.h"
 
 int main(int argc, char *argv[]) {
 
@@ -133,6 +134,20 @@ int main(int argc, char *argv[]) {
         int fitstrt, nlns_fit;
         fitstrt = fitoffset * nlns;
         nlns_fit = fitlength * nlns;
+
+        if( rnum > 1 ) {
+          sum_array_rnum( qflux_neinaa, rnum, nlns );
+          sum_array_rnum( qflux_neincc, rnum, nlns );
+          sum_array_rnum( qflux_catcat, rnum, nlns );
+          sum_array_rnum( qflux_aniani, rnum, nlns );
+          sum_array_rnum( qflux_anicat, rnum, nlns );
+        }
+
+        write_array_to_file ( "cond_neinaa_sum.out", qflux_neinaa, 1, nlns );
+        write_array_to_file ( "cond_neincc_sum.out", qflux_neincc, 1, nlns );
+        write_array_to_file ( "cond_catcat_sum.out", qflux_catcat, 1, nlns );
+        write_array_to_file ( "cond_anicat_sum.out", qflux_anicat, 1, nlns );
+        write_array_to_file ( "cond_aniani_sum.out", qflux_aniani, 1, nlns );
 
         printf("NEINAA: ");
         calculate_conductivity(&(qflux_neinaa[fitstrt]), nlns_fit, temp, avvol, timestep, fitstrt, "CONDUCTIVITY IS:", "S/m");

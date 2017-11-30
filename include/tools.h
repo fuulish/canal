@@ -35,3 +35,4 @@ void divide_array_array ( double *out, double *a, double *b, int ncol, int nlns 
 void divide_array_array_inplace ( double *a, double *b, int ncol, int nlns );
 void subtract_array_array ( double *out, double *a, double *b, int ncol, int nlns );
 void subtract_arrays_inplace ( double *a, double *b, int ncol, int nlns );
+void sum_array_rnum( double *out, int rnum, int nlns );

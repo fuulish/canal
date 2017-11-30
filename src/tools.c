@@ -156,3 +156,11 @@ void add_array_number ( double *out, double *a, double f, int ncol, int nlns )
     for ( j=0; j<nlns; ++j )
       ael(out, nlns, i, j) = ael(a, nlns, i, j) + f;
 }
+
+void sum_array_rnum( double *out, int rnum, int nlns )
+{
+  int i;
+
+  for( i=1; i<rnum; ++i )
+    add_arrays_inplace( out, asub( out, nlns, i, 0 ), 1, nlns );
+}
