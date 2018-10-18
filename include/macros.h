@@ -22,3 +22,5 @@ along with canal.  If not, see <http://www.gnu.org/licenses/>.
 
 #define ael(A, WIDTH, i, j) (A[(i)*(WIDTH) + (j)])
 #define asub(A, WIDTH, i, j) (&(A[(i)*(WIDTH) + (j)]))
+#define aindex(WIDTH, i, j) ((i)*(WIDTH) + (j))
+
