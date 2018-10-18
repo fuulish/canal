@@ -77,30 +77,37 @@ double *read_file_double(char *fname, int nlns, int ncol, char *delim, int strid
   char *tok;
   int i;
   int j =0;
-  int cnt = -1;
+  int cnt = 0;
 
   size_t nbytes = 0;
-  int ndatpt = ncol * nlns;
+
+  int localNlns = nlns / stride; // savety/rounding margin
+  int ndatpt = ncol * localNlns;
 
   double *data = (double *) malloc ( ndatpt * sizeof(double) );
   datei = fopen(fname, "r");
 
   if ( datei != NULL ) {
-    while ( getline ( &txt, &nbytes, datei ) != -1 ) {
-      ++cnt;
+    while ( (getline ( &txt, &nbytes, datei ) != -1) && (j < localNlns) ) {
       if( cnt % stride == 0 ) {
         tok = strtok ( txt, delim );
 
         i = 0;
 
         while ( tok != NULL ) {
-          ael(data, nlns, i, j) = atof ( tok );
+          ael(data, localNlns, i, j) = atof ( tok );
+          if( aindex(localNlns, i, j) >= ndatpt )
+          {
+            printf("SOMETHING's WRONG\n");
+            printf("%i %i\n", aindex(localNlns, i, j), ndatpt);
+          }
 
           tok = strtok ( NULL, delim );
           ++i;
         }
         ++j;
       }
+      ++cnt;
     }
     fclose ( datei );
     free ( txt );
