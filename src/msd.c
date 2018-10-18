@@ -242,11 +242,11 @@ int get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cnd
               rmax = rndx;
 
             if ( (chg[i] > 0) && (chg[j] > 0) )
-              add_array_number_inplace ( asub(nrm_catcat, nlns, rndx, 0), 1., 1, nlns_tmp );
+              add_array_number_inplace ( asub(nrm_catcat, nlns, rndx, 0), scale, 1, nlns_tmp );
             else if ( (chg[i] < 0) && (chg[j] < 0) )
-              add_array_number_inplace ( asub(nrm_aniani, nlns, rndx, 0), 1., 1, nlns_tmp );
+              add_array_number_inplace ( asub(nrm_aniani, nlns, rndx, 0), scale, 1, nlns_tmp );
             else
-              add_array_number_inplace ( asub(nrm_anicat, nlns, rndx, 0), 1., 1, nlns_tmp );
+              add_array_number_inplace ( asub(nrm_anicat, nlns, rndx, 0), scale, 1, nlns_tmp );
 
           }
           else {
