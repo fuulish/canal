@@ -140,7 +140,8 @@ void get_qflux ( double *cnd, double *x, double *y, double *z, double *chg, int 
 
   }
 
-  divide_array_array_inplace ( cnd, nrm, 1, nlns );
+  int safely = 1;
+  divide_array_array_inplace ( cnd, nrm, 1, nlns, safely );
 
   free (tmp);
   free (nrm);
@@ -148,7 +149,7 @@ void get_qflux ( double *cnd, double *x, double *y, double *z, double *chg, int 
   // free (msd);
 }
 
-int get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cnd_ac, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell )
+int get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cnd_ac, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell, int nmaxlns )
 {
   int i, j, n;
   int nlns_tmp;
@@ -192,6 +193,8 @@ int get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cnd
 
     offcnt = n*offset;
     nlns_tmp = nlns - offcnt;
+    nlns_tmp = nlns_tmp > nmaxlns ? nmaxlns : nlns_tmp;
+
     add_array_number_inplace ( nrm, 1., 1, nlns_tmp );
 
     // different molecules
@@ -300,13 +303,15 @@ int get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cnd
     ptr_nrm_aa = nrm;
   }
 
+  int safely = 1;
+
   //FUDO| division needs to be done for all array elements
   //FUDO| problemativ if nrm == 0 somewhere, which is not unlikely
-  divide_array_array_inplace ( neinaa, ptr_nrm_na, 1, nlns );
-  divide_array_array_inplace ( neincc, ptr_nrm_nc, 1, nlns );
-  divide_array_array_inplace ( cnd_cc, ptr_nrm_cc, 1, nlns*rmax );
-  divide_array_array_inplace ( cnd_ac, ptr_nrm_ac, 1, nlns*rmax );
-  divide_array_array_inplace ( cnd_aa, ptr_nrm_aa, 1, nlns*rmax );
+  divide_array_array_inplace ( neinaa, ptr_nrm_na, 1, nlns, safely );
+  divide_array_array_inplace ( neincc, ptr_nrm_nc, 1, nlns, safely );
+  divide_array_array_inplace ( cnd_cc, ptr_nrm_cc, 1, nlns*rmax, safely );
+  divide_array_array_inplace ( cnd_ac, ptr_nrm_ac, 1, nlns*rmax, safely );
+  divide_array_array_inplace ( cnd_aa, ptr_nrm_aa, 1, nlns*rmax, safely );
 
 #ifndef STRICT
   /* approximately accurate re-normalization to recover total conductivity */
@@ -444,13 +449,14 @@ void get_mobil_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cn
   ptr_nrm_ac = nrm;
   ptr_nrm_aa = nrm;
 
+  int safely = 1;
   //FUDO| division needs to be done for all array elements
   //FUDO| problemativ if nrm == 0 somewhere, which is not unlikely
-  divide_array_array_inplace ( neinaa, ptr_nrm_na, 1, nlns );
-  divide_array_array_inplace ( neincc, ptr_nrm_nc, 1, nlns );
-  divide_array_array_inplace ( cnd_cc, ptr_nrm_cc, 1, nlns*rnum );
-  divide_array_array_inplace ( cnd_ac, ptr_nrm_ac, 1, nlns*rnum );
-  divide_array_array_inplace ( cnd_aa, ptr_nrm_aa, 1, nlns*rnum );
+  divide_array_array_inplace ( neinaa, ptr_nrm_na, 1, nlns, safely );
+  divide_array_array_inplace ( neincc, ptr_nrm_nc, 1, nlns, safely );
+  divide_array_array_inplace ( cnd_cc, ptr_nrm_cc, 1, nlns*rnum, safely );
+  divide_array_array_inplace ( cnd_ac, ptr_nrm_ac, 1, nlns*rnum, safely );
+  divide_array_array_inplace ( cnd_aa, ptr_nrm_aa, 1, nlns*rnum, safely );
 
 #ifdef DEBUG
   write_array_to_file ( "norm_neinaa.out", ptr_nrm_na, 1, nlns );
@@ -531,10 +537,12 @@ void get_diff ( double *neinaa, double *neincc, double *x, double *y, double *z,
   ptr_nrm_na = nrm;
   ptr_nrm_nc = nrm;
 
+  int safely = 1;
+
   //FUDO| division needs to be done for all array elements
   //FUDO| problemativ if nrm == 0 somewhere, which is not unlikely
-  divide_array_array_inplace ( neinaa, ptr_nrm_na, 1, nlns );
-  divide_array_array_inplace ( neincc, ptr_nrm_nc, 1, nlns );
+  divide_array_array_inplace ( neinaa, ptr_nrm_na, 1, nlns, safely );
+  divide_array_array_inplace ( neincc, ptr_nrm_nc, 1, nlns, safely );
 
 #ifdef DEBUG
   write_array_to_file ( "norm_neinaa.out", ptr_nrm_na, 1, nlns );

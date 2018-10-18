@@ -69,8 +69,27 @@ void divide_array_array ( double *out, double *a, double *b, int ncol, int nlns 
   private(i,j) shared(out, nlns, ncol, a, b)
 #endif
   for ( i=0; i<ncol; ++i )
-    for ( j=0; j<nlns; ++j )
-      ael(out, nlns, i, j) = ael(a, nlns, i, j) / ael(b, nlns, i, j);
+    for ( j=0; j<nlns; ++j ) {
+        ael(out, nlns, i, j) = ael(a, nlns, i, j) / ael(b, nlns, i, j);
+    }
+
+}
+
+void divide_array_array_safely ( double *out, double *a, double *b, int ncol, int nlns )
+{
+  int i, j;
+
+#ifdef OPENMP
+#pragma omp parallel for default(none) \
+  private(i,j) shared(out, nlns, ncol, a, b)
+#endif
+  for ( i=0; i<ncol; ++i )
+    for ( j=0; j<nlns; ++j ) {
+      if( ael(b, nlns, i, j) != 0.0 )
+        ael(out, nlns, i, j) = ael(a, nlns, i, j) / ael(b, nlns, i, j);
+      else
+        ael(out, nlns, i, j) = 0.0;
+    }
 
 }
 
@@ -79,9 +98,12 @@ void multiply_array_array_inplace ( double *a, double *b, int ncol, int nlns )
   multiply_array_array ( a, a, b, ncol, nlns );
 }
 
-void divide_array_array_inplace ( double *a, double *b, int ncol, int nlns )
+void divide_array_array_inplace ( double *a, double *b, int ncol, int nlns, int safely )
 {
-  divide_array_array ( a, a, b, ncol, nlns );
+  if( safely )
+    divide_array_array_safely ( a, a, b, ncol, nlns );
+  else
+    divide_array_array ( a, a, b, ncol, nlns );
 }
 
 void multiply_array_array ( double *out, double *a, double *b, int ncol, int nlns )

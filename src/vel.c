@@ -233,11 +233,13 @@ void get_vflux_locl ( double *neinaa, double *neincc, double *cnd_cc, double *cn
   //FUDO| division needs to be done for all array elements
   //FUDO| problemativ if nrm == 0 somewhere, which is not unlikely
 
-  divide_array_array_inplace ( neinaa, nrm_na, 1, rnum );
-  divide_array_array_inplace ( neincc, nrm_nc, 1, rnum );
-  divide_array_array_inplace ( cnd_cc, nrm_cc, 1, rnum );
-  divide_array_array_inplace ( cnd_ac, nrm_ac, 1, rnum );
-  divide_array_array_inplace ( cnd_aa, nrm_aa, 1, rnum );
+  int safely = 1;
+
+  divide_array_array_inplace ( neinaa, nrm_na, 1, rnum, safely );
+  divide_array_array_inplace ( neincc, nrm_nc, 1, rnum, safely );
+  divide_array_array_inplace ( cnd_cc, nrm_cc, 1, rnum, safely );
+  divide_array_array_inplace ( cnd_ac, nrm_ac, 1, rnum, safely );
+  divide_array_array_inplace ( cnd_aa, nrm_aa, 1, rnum, safely );
 
 #ifdef DEBUG
   write_array_to_file ( "norm_neinaa.out", nrm_na, 1, rnum );

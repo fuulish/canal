@@ -51,6 +51,7 @@ int main(int argc, char *argv[]) {
   double fitoffset = 0.1;
   double fitlength = 0.9;
   int datastride = 1;
+  int nmaxlns = -1;
 
   char xcom_fn[100];
   char ycom_fn[100];
@@ -60,7 +61,7 @@ int main(int argc, char *argv[]) {
   char cell_fn[100];
 
   if ( argc > 1 )
-    read_input( argv[1], &nrestart, &avvol, &temp, &timestep, &split, &spatial, &rnum, &rstart, &dr, xcom_fn, ycom_fn, zcom_fn, chgs_fn, cell_fn, &task, &fitoffset, &fitlength, &datastride );
+    read_input( argv[1], &nrestart, &avvol, &temp, &timestep, &split, &spatial, &rnum, &rstart, &dr, xcom_fn, ycom_fn, zcom_fn, chgs_fn, cell_fn, &task, &fitoffset, &fitlength, &datastride, &nmaxlns );
   else
     print_error ( INCOMPLETE_INPUT, "Input file is missing", __FILE__, __LINE__ );
 
@@ -133,7 +134,7 @@ int main(int argc, char *argv[]) {
         double *qflux_anicat = (double *) calloc ( arrlen, sizeof(double));
         double *qflux_aniani = (double *) calloc ( arrlen, sizeof(double));
 
-        int rmax = get_qflux_srtd ( qflux_neinaa, qflux_neincc, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nsnap, nrestart, dr, rstart, rnum, cell );
+        int rmax = get_qflux_srtd ( qflux_neinaa, qflux_neincc, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nsnap, nrestart, dr, rstart, rnum, cell, nmaxlns );
         // get_qflux_srtd ( qflux_neinst, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nsnap, nrestart);
 
         write_array_to_file ( "cond_neinaa.out", qflux_neinaa, 1, nsnap );

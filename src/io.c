@@ -138,7 +138,7 @@ void write_array_to_file ( char *fname, double *a, int ncol, int nlns )
   }
 }
 
-void read_input( char *fname, int *nrestart, double *avvol, double *temp, double *timestep, int *split, int *spatial, int *rnum, double *rstart, double *dr, char *xcom_fn, char *ycom_fn, char *zcom_fn, char *chgs_fn, char *cell_fn, int *task, double *fitoffset, double *fitlength, int *datastride )
+void read_input( char *fname, int *nrestart, double *avvol, double *temp, double *timestep, int *split, int *spatial, int *rnum, double *rstart, double *dr, char *xcom_fn, char *ycom_fn, char *zcom_fn, char *chgs_fn, char *cell_fn, int *task, double *fitoffset, double *fitlength, int *datastride, int *nmaxlns )
 {
     FILE *datei;
     char *txt;
@@ -164,6 +164,7 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
       FITOFFSET,
       FITLENGTH,
       DATASTRIDE,
+      NMAXLINES,
     };
 
     int def_nrestart = NRESTART;
@@ -181,6 +182,7 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
     int def_fitoffset = FITOFFSET;
     int def_fitlength = FITLENGTH;
     int def_datastride = DATASTRIDE;
+    int def_nmaxlines = NMAXLINES;
 
     datei = fopen(fname, "r");
 
@@ -298,8 +300,14 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
       else if ( strstr(variable, "datastride" ) != NULL )
       {
         buf = strtok (value, " \n");
-        *datastride = atof(buf);
+        *datastride = atol(buf);
         def_datastride = 0;
+      }
+      else if ( strstr(variable, "nmaxlines" ) != NULL )
+      {
+        buf = strtok (value, " \n");
+        *nmaxlns = atol(buf);
+        def_nmaxlines = 0;
       }
     }
 
@@ -349,6 +357,9 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
       print_warning ( YOU_KNOW_WHAT, "Using defaults for DATASTRIDE");
     else
       *timestep *= *datastride;
+
+    if ( def_nmaxlines == NMAXLINES )
+      print_warning ( YOU_KNOW_WHAT, "Using defaults for NMAXLINES");
 
 
     fclose(datei);

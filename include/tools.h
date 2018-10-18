@@ -32,7 +32,8 @@ void subtract_array_number ( double *out, double *a, double f, int ncol, int nln
 void add_array_array ( double *out, double *a, double *b, int ncol, int nlns );
 void add_arrays_inplace ( double *b, double *a, int ncol, int nlns );
 void divide_array_array ( double *out, double *a, double *b, int ncol, int nlns );
-void divide_array_array_inplace ( double *a, double *b, int ncol, int nlns );
+void divide_array_array_safely ( double *out, double *a, double *b, int ncol, int nlns );
+void divide_array_array_inplace ( double *a, double *b, int ncol, int nlns, int safely );
 void subtract_array_array ( double *out, double *a, double *b, int ncol, int nlns );
 void subtract_arrays_inplace ( double *a, double *b, int ncol, int nlns );
 void sum_array_rnum( double *out, int rnum, int nlns );
