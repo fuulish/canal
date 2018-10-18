@@ -50,6 +50,7 @@ int main(int argc, char *argv[]) {
   int task = NTTN;
   double fitoffset = 0.1;
   double fitlength = 0.9;
+  int datastride = 1;
 
   char xcom_fn[100];
   char ycom_fn[100];
@@ -59,23 +60,23 @@ int main(int argc, char *argv[]) {
   char cell_fn[100];
 
   if ( argc > 1 )
-    read_input( argv[1], &nrestart, &avvol, &temp, &timestep, &split, &spatial, &rnum, &rstart, &dr, xcom_fn, ycom_fn, zcom_fn, chgs_fn, cell_fn, &task, &fitoffset, &fitlength );
+    read_input( argv[1], &nrestart, &avvol, &temp, &timestep, &split, &spatial, &rnum, &rstart, &dr, xcom_fn, ycom_fn, zcom_fn, chgs_fn, cell_fn, &task, &fitoffset, &fitlength, &datastride );
   else
     print_error ( INCOMPLETE_INPUT, "Input file is missing", __FILE__, __LINE__ );
 
   double *xcom, *ycom, *zcom, *chgs, *cell;
 
   analyze_file ( xcom_fn, &ncol, &nlns, delim );
-  xcom = read_file_double ( xcom_fn, nlns, ncol, delim );
+  xcom = read_file_double ( xcom_fn, nlns, ncol, delim, datastride );
 
   analyze_file ( ycom_fn, &ncol, &nlns, delim );
-  ycom = read_file_double ( ycom_fn, nlns, ncol, delim );
+  ycom = read_file_double ( ycom_fn, nlns, ncol, delim, datastride );
 
   analyze_file ( zcom_fn, &ncol, &nlns, delim );
-  zcom = read_file_double ( zcom_fn, nlns, ncol, delim );
+  zcom = read_file_double ( zcom_fn, nlns, ncol, delim, datastride );
 
   analyze_file ( chgs_fn, &qcol, &nchg, delim );
-  chgs = read_file_double ( chgs_fn, nchg, qcol, delim );
+  chgs = read_file_double ( chgs_fn, nchg, qcol, delim, datastride );
 
   printf("NCHGS: %i, NCOL: %i\n", nchg, ncol);
   if ( nchg != ncol ) {
@@ -87,7 +88,7 @@ int main(int argc, char *argv[]) {
   if ( rnum > 1 ) {
 
     analyze_file ( cell_fn, &ccol, &ncll, delim );
-    cell = read_file_double ( cell_fn, ncll, ccol, delim );
+    cell = read_file_double ( cell_fn, ncll, ccol, delim, datastride );
 
     if ( ncll != nlns ) {
       print_error ( FATAL, "Dimensions of cell array and position data don't match", __FILE__, __LINE__ );
@@ -97,6 +98,8 @@ int main(int argc, char *argv[]) {
   else {
     cell = (double *) calloc ( nlns, sizeof (double));
   }
+
+  printf("Finished reading all input files\n");
 
   /* data I looks fine
   for ( i=1; i<2; ++i ) {

@@ -70,13 +70,14 @@ int analyze_file ( char *fname, int *ncol, int *nlns, char *delim)
 }
 
 //FUDO| turn around ncol, nlns
-double *read_file_double(char *fname, int nlns, int ncol, char *delim)
+double *read_file_double(char *fname, int nlns, int ncol, char *delim, int stride)
 {
   FILE *datei;
   char *txt;
   char *tok;
   int i;
   int j =0;
+  int cnt = -1;
 
   size_t nbytes = 0;
   int ndatpt = ncol * nlns;
@@ -86,19 +87,20 @@ double *read_file_double(char *fname, int nlns, int ncol, char *delim)
 
   if ( datei != NULL ) {
     while ( getline ( &txt, &nbytes, datei ) != -1 ) {
-      tok = strtok ( txt, delim );
+      ++cnt;
+      if( cnt % stride == 0 ) {
+        tok = strtok ( txt, delim );
 
-      i = 0;
+        i = 0;
 
-      while ( tok != NULL ) {
-        ael(data, nlns, i, j) = atof ( tok );
+        while ( tok != NULL ) {
+          ael(data, nlns, i, j) = atof ( tok );
 
-        tok = strtok ( NULL, delim );
-        ++i;
+          tok = strtok ( NULL, delim );
+          ++i;
+        }
+        ++j;
       }
-
-      ++j;
-
     }
     fclose ( datei );
     free ( txt );
@@ -129,7 +131,7 @@ void write_array_to_file ( char *fname, double *a, int ncol, int nlns )
   }
 }
 
-void read_input( char *fname, int *nrestart, double *avvol, double *temp, double *timestep, int *split, int *spatial, int *rnum, double *rstart, double *dr, char *xcom_fn, char *ycom_fn, char *zcom_fn, char *chgs_fn, char *cell_fn, int *task, double *fitoffset, double *fitlength )
+void read_input( char *fname, int *nrestart, double *avvol, double *temp, double *timestep, int *split, int *spatial, int *rnum, double *rstart, double *dr, char *xcom_fn, char *ycom_fn, char *zcom_fn, char *chgs_fn, char *cell_fn, int *task, double *fitoffset, double *fitlength, int *datastride )
 {
     FILE *datei;
     char *txt;
@@ -154,6 +156,7 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
       TASK,
       FITOFFSET,
       FITLENGTH,
+      DATASTRIDE,
     };
 
     int def_nrestart = NRESTART;
@@ -170,6 +173,7 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
     int def_task = TASK;
     int def_fitoffset = FITOFFSET;
     int def_fitlength = FITLENGTH;
+    int def_datastride = DATASTRIDE;
 
     datei = fopen(fname, "r");
 
@@ -284,6 +288,12 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
         *fitlength = atof(buf);
         def_fitlength = 0;
       }
+      else if ( strstr(variable, "datastride" ) != NULL )
+      {
+        buf = strtok (value, " \n");
+        *datastride = atof(buf);
+        def_datastride = 0;
+      }
     }
 
     if ( def_nrestart == NRESTART )
@@ -327,6 +337,12 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
 
     if ( def_fitlength == FITLENGTH )
       print_warning ( YOU_KNOW_WHAT, "Using defaults for FITLENGTH");
+
+    if ( def_datastride == DATASTRIDE )
+      print_warning ( YOU_KNOW_WHAT, "Using defaults for DATASTRIDE");
+    else
+      *timestep *= *datastride;
+
 
     fclose(datei);
     free(txt);
