@@ -41,30 +41,10 @@ int main(int argc, char *argv[]) {
   // TODO: create new datastructure that holds input arguments
   // pass that to read_input, e.g., inpArgs
 
-  int nrestart = 1;
-  double avvol = 1.;
-  double temp = 300.;
-  double timestep = 0.5;
-  int split = 0;
-  int spatial = 0;
-  int rnum = 1;
-  double rstart = 5.;
-  double dr = 2.;
-  int task = NTTN;
-  double fitoffset = 0.1;
-  double fitlength = 0.9;
-  int datastride = 1;
-  int nmaxlns = -1;
-
-  char xcom_fn[100];
-  char ycom_fn[100];
-  char zcom_fn[100];
-
-  char chgs_fn[100];
-  char cell_fn[100];
+  inpArg_t inputArgs;
 
   if ( argc > 1 )
-    read_input( argv[1], &nrestart, &avvol, &temp, &timestep, &split, &spatial, &rnum, &rstart, &dr, xcom_fn, ycom_fn, zcom_fn, chgs_fn, cell_fn, &task, &fitoffset, &fitlength, &datastride, &nmaxlns );
+    inputArgs = read_input( argv[1] );
   else
     print_error ( INCOMPLETE_INPUT, "Input file is missing", __FILE__, __LINE__ );
 
@@ -73,17 +53,17 @@ int main(int argc, char *argv[]) {
   // TODO: let analyze file return the desired values in a structure
   // e.g., inputFileCharacteristics
 
-  analyze_file ( xcom_fn, &ncol, &nlns, delim );
-  xcom = read_file_double ( xcom_fn, nlns, ncol, delim, datastride );
+  analyze_file ( inputArgs.xcom_fn, &ncol, &nlns, delim );
+  xcom = read_file_double ( inputArgs.xcom_fn, nlns, ncol, delim, inputArgs.datastride );
 
-  analyze_file ( ycom_fn, &ncol, &nlns, delim );
-  ycom = read_file_double ( ycom_fn, nlns, ncol, delim, datastride );
+  analyze_file ( inputArgs.ycom_fn, &ncol, &nlns, delim );
+  ycom = read_file_double ( inputArgs.ycom_fn, nlns, ncol, delim, inputArgs.datastride );
 
-  analyze_file ( zcom_fn, &ncol, &nlns, delim );
-  zcom = read_file_double ( zcom_fn, nlns, ncol, delim, datastride );
+  analyze_file ( inputArgs.zcom_fn, &ncol, &nlns, delim );
+  zcom = read_file_double ( inputArgs.zcom_fn, nlns, ncol, delim, inputArgs.datastride );
 
-  analyze_file ( chgs_fn, &qcol, &nchg, delim );
-  chgs = read_file_double ( chgs_fn, nchg, qcol, delim, 1 );
+  analyze_file ( inputArgs.chgs_fn, &qcol, &nchg, delim );
+  chgs = read_file_double ( inputArgs.chgs_fn, nchg, qcol, delim, 1 );
 
   printf("NCHGS: %i, NCOL: %i\n", nchg, ncol);
   if ( nchg != ncol ) {
@@ -92,10 +72,10 @@ int main(int argc, char *argv[]) {
   }
 
   //FUDO| this needs fixing, cell allocation below only to avoid issues with maybe-unitialized warning
-  if ( rnum > 1 ) {
+  if ( inputArgs.rnum > 1 ) {
 
-    analyze_file ( cell_fn, &ccol, &ncll, delim );
-    cell = read_file_double ( cell_fn, ncll, ccol, delim, datastride );
+    analyze_file ( inputArgs.cell_fn, &ccol, &ncll, delim );
+    cell = read_file_double ( inputArgs.cell_fn, ncll, ccol, delim, inputArgs.datastride );
 
     if ( ncll != nlns ) {
       print_error ( FATAL, "Dimensions of cell array and position data don't match", __FILE__, __LINE__ );
@@ -103,18 +83,18 @@ int main(int argc, char *argv[]) {
     }
   }
   else {
-    cell = (double *) calloc ( nlns / datastride, sizeof (double));
+    cell = (double *) calloc ( nlns / inputArgs.datastride, sizeof (double));
   }
 
-  int nsnap = nlns / datastride;
+  int nsnap = nlns / inputArgs.datastride;
 
-  if( nrestart == -1 )
-    nrestart = nsnap;
+  if( inputArgs.nrestart == -1 )
+    inputArgs.nrestart = nsnap;
 
-  if( nmaxlns == -1 )
-    nmaxlns = nsnap;
+  if( inputArgs.nmaxlns == -1 )
+    inputArgs.nmaxlns = nsnap;
 
-  if( nrestart > nsnap ) {
+  if( inputArgs.nrestart > nsnap ) {
     print_error( FATAL, "More restart points requested than snapshots available", __FILE__, __LINE__ );
     return FATAL;
   }
@@ -129,13 +109,13 @@ int main(int argc, char *argv[]) {
   }
   */
 
-  switch ( task ) {
+  switch ( inputArgs.task ) {
     case COND:
       {
 
-      if ( split ) {
+      if ( inputArgs.split ) {
 
-        int arrlen = nsnap * rnum;
+        int arrlen = nsnap * inputArgs.rnum;
 
         double *qflux_neinaa = (double *) calloc ( arrlen, sizeof(double));
         double *qflux_neincc = (double *) calloc ( arrlen, sizeof(double));
@@ -143,27 +123,27 @@ int main(int argc, char *argv[]) {
         double *qflux_anicat = (double *) calloc ( arrlen, sizeof(double));
         double *qflux_aniani = (double *) calloc ( arrlen, sizeof(double));
 
-        int rmax = get_qflux_srtd ( qflux_neinaa, qflux_neincc, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nsnap, nrestart, dr, rstart, rnum, cell, nmaxlns );
+        int rmax = get_qflux_srtd ( qflux_neinaa, qflux_neincc, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nsnap, inputArgs.nrestart, inputArgs.dr, inputArgs.rstart, inputArgs.rnum, cell, inputArgs.nmaxlns );
         // get_qflux_srtd ( qflux_neinst, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nsnap, nrestart);
 
         write_array_to_file ( "cond_neinaa.out", qflux_neinaa, 1, nsnap );
         write_array_to_file ( "cond_neincc.out", qflux_neincc, 1, nsnap );
-        write_array_to_file ( "cond_catcat.out", qflux_catcat, rnum, nsnap );
-        write_array_to_file ( "cond_anicat.out", qflux_anicat, rnum, nsnap );
-        write_array_to_file ( "cond_aniani.out", qflux_aniani, rnum, nsnap );
+        write_array_to_file ( "cond_catcat.out", qflux_catcat, inputArgs.rnum, nsnap );
+        write_array_to_file ( "cond_anicat.out", qflux_anicat, inputArgs.rnum, nsnap );
+        write_array_to_file ( "cond_aniani.out", qflux_aniani, inputArgs.rnum, nsnap );
 
         printf("NUMBER OF COLUMNS: %i AND NUMBER OF LINES: %i\n", ncol, nsnap);
 
         int fitstrt, nsnap_fit;
-        fitstrt = fitoffset * nsnap;
-        nsnap_fit = fitlength * nsnap;
+        fitstrt = inputArgs.fitoffset * nsnap;
+        nsnap_fit = inputArgs.fitlength * nsnap;
 
-        if( rnum > 1 ) {
-          sum_array_rnum( qflux_neinaa, rnum, nsnap );
-          sum_array_rnum( qflux_neincc, rnum, nsnap );
-          sum_array_rnum( qflux_catcat, rnum, nsnap );
-          sum_array_rnum( qflux_aniani, rnum, nsnap );
-          sum_array_rnum( qflux_anicat, rnum, nsnap );
+        if( inputArgs.rnum > 1 ) {
+          sum_array_rnum( qflux_neinaa, inputArgs.rnum, nsnap );
+          sum_array_rnum( qflux_neincc, inputArgs.rnum, nsnap );
+          sum_array_rnum( qflux_catcat, inputArgs.rnum, nsnap );
+          sum_array_rnum( qflux_aniani, inputArgs.rnum, nsnap );
+          sum_array_rnum( qflux_anicat, inputArgs.rnum, nsnap );
 
           // int ncat, nani;
           // get_number_of_cations_anions( &ncat, &nani, chgs, ncol );
@@ -185,15 +165,15 @@ int main(int argc, char *argv[]) {
         write_array_to_file ( "cond_aniani_sum.out", qflux_aniani, 1, nsnap );
 
         printf("NEINAA: ");
-        calculate_conductivity(&(qflux_neinaa[fitstrt]), nsnap_fit, temp, avvol, timestep, fitstrt, "CONDUCTIVITY IS:", "S/m");
+        calculate_conductivity(&(qflux_neinaa[fitstrt]), nsnap_fit, inputArgs.temp, inputArgs.avvol, inputArgs.timestep, fitstrt, "CONDUCTIVITY IS:", "S/m");
         printf("NEINCC: ");
-        calculate_conductivity(&(qflux_neincc[fitstrt]), nsnap_fit, temp, avvol, timestep, fitstrt, "CONDUCTIVITY IS:", "S/m");
+        calculate_conductivity(&(qflux_neincc[fitstrt]), nsnap_fit, inputArgs.temp, inputArgs.avvol, inputArgs.timestep, fitstrt, "CONDUCTIVITY IS:", "S/m");
         printf("CATCAT: ");
-        calculate_conductivity(&(qflux_catcat[fitstrt]), nsnap_fit, temp, avvol, timestep, fitstrt, "CONDUCTIVITY IS:", "S/m");
+        calculate_conductivity(&(qflux_catcat[fitstrt]), nsnap_fit, inputArgs.temp, inputArgs.avvol, inputArgs.timestep, fitstrt, "CONDUCTIVITY IS:", "S/m");
         printf("ANIANI: ");
-        calculate_conductivity(&(qflux_aniani[fitstrt]), nsnap_fit, temp, avvol, timestep, fitstrt, "CONDUCTIVITY IS:", "S/m");
+        calculate_conductivity(&(qflux_aniani[fitstrt]), nsnap_fit, inputArgs.temp, inputArgs.avvol, inputArgs.timestep, fitstrt, "CONDUCTIVITY IS:", "S/m");
         printf("ANICAT: ");
-        calculate_conductivity(&(qflux_anicat[fitstrt]), nsnap_fit, temp, avvol, timestep, fitstrt, "CONDUCTIVITY IS:", "S/m");
+        calculate_conductivity(&(qflux_anicat[fitstrt]), nsnap_fit, inputArgs.temp, inputArgs.avvol, inputArgs.timestep, fitstrt, "CONDUCTIVITY IS:", "S/m");
 
         free ( qflux_neinaa );
         free ( qflux_neincc );
@@ -204,15 +184,15 @@ int main(int argc, char *argv[]) {
       else {
         double *qflux = (double *) calloc ( nsnap, sizeof(double));
 
-        get_qflux ( qflux, xcom, ycom, zcom, chgs, ncol, nsnap, nrestart);
+        get_qflux ( qflux, xcom, ycom, zcom, chgs, ncol, nsnap, inputArgs.nrestart);
 
         int fitstrt, nsnap_fit;
-        fitstrt = fitoffset * nsnap;
-        nsnap_fit = fitlength * nsnap;
+        fitstrt = inputArgs.fitoffset * nsnap;
+        nsnap_fit = inputArgs.fitlength * nsnap;
         printf("nsnap_FIT: %i %i %i\n", nsnap_fit, nsnap, fitstrt);
 
         printf("FULL: ");
-        calculate_conductivity(&(qflux[fitstrt]), nsnap_fit, temp, avvol, timestep, fitstrt, "CONDUCTIVITY IS:", "S/m");
+        calculate_conductivity(&(qflux[fitstrt]), nsnap_fit, inputArgs.temp, inputArgs.avvol, inputArgs.timestep, fitstrt, "CONDUCTIVITY IS:", "S/m");
 
         write_array_to_file ( "cond_all.out", qflux, 1, nsnap );
 
@@ -224,7 +204,7 @@ int main(int argc, char *argv[]) {
       break;
     case VELP:
       {
-      int arrlen = rnum;
+      int arrlen = inputArgs.rnum;
 
       double *qflux_neinaa = (double *) calloc ( arrlen, sizeof(double));
       double *qflux_neincc = (double *) calloc ( arrlen, sizeof(double));
@@ -232,13 +212,13 @@ int main(int argc, char *argv[]) {
       double *qflux_anicat = (double *) calloc ( arrlen, sizeof(double));
       double *qflux_aniani = (double *) calloc ( arrlen, sizeof(double));
 
-      get_vflux_locl ( qflux_neinaa, qflux_neincc, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nsnap, nrestart, dr, rstart, rnum, cell, timestep );
+      get_vflux_locl ( qflux_neinaa, qflux_neincc, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nsnap, inputArgs.nrestart, inputArgs.dr, inputArgs.rstart, inputArgs.rnum, cell, inputArgs.timestep );
 
-      write_array_to_file ( "velp_neinaa.out", qflux_neinaa, 1, rnum );
-      write_array_to_file ( "velp_neincc.out", qflux_neincc, 1, rnum );
-      write_array_to_file ( "velp_catcat.out", qflux_catcat, 1, rnum );
-      write_array_to_file ( "velp_anicat.out", qflux_anicat, 1, rnum );
-      write_array_to_file ( "velp_aniani.out", qflux_aniani, 1, rnum );
+      write_array_to_file ( "velp_neinaa.out", qflux_neinaa, 1, inputArgs.rnum );
+      write_array_to_file ( "velp_neincc.out", qflux_neincc, 1, inputArgs.rnum );
+      write_array_to_file ( "velp_catcat.out", qflux_catcat, 1, inputArgs.rnum );
+      write_array_to_file ( "velp_anicat.out", qflux_anicat, 1, inputArgs.rnum );
+      write_array_to_file ( "velp_aniani.out", qflux_aniani, 1, inputArgs.rnum );
 
       printf("NUMBER OF COLUMNS: %i AND NUMBER OF LINES: %i\n", ncol, nsnap);
 
@@ -252,7 +232,7 @@ int main(int argc, char *argv[]) {
     case ELMO:
       {
         // check a couple of things, and maybe warn
-        int arrlen = nsnap * rnum;
+        int arrlen = nsnap * inputArgs.rnum;
 
         double *qflux_neinaa = (double *) calloc ( arrlen, sizeof(double));
         double *qflux_neincc = (double *) calloc ( arrlen, sizeof(double));
@@ -260,19 +240,19 @@ int main(int argc, char *argv[]) {
         double *qflux_anicat = (double *) calloc ( arrlen, sizeof(double));
         double *qflux_aniani = (double *) calloc ( arrlen, sizeof(double));
 
-        get_mobil_srtd ( qflux_neinaa, qflux_neincc, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nsnap, nrestart, dr, rstart, rnum, cell );
+        get_mobil_srtd ( qflux_neinaa, qflux_neincc, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nsnap, inputArgs.nrestart, inputArgs.dr, inputArgs.rstart, inputArgs.rnum, cell );
 
         write_array_to_file ( "mobil_neinaa.out", qflux_neinaa, 1, nsnap );
         write_array_to_file ( "mobil_neincc.out", qflux_neincc, 1, nsnap );
-        write_array_to_file ( "mobil_catcat.out", qflux_catcat, rnum, nsnap );
-        write_array_to_file ( "mobil_anicat.out", qflux_anicat, rnum, nsnap );
-        write_array_to_file ( "mobil_aniani.out", qflux_aniani, rnum, nsnap );
+        write_array_to_file ( "mobil_catcat.out", qflux_catcat, inputArgs.rnum, nsnap );
+        write_array_to_file ( "mobil_anicat.out", qflux_anicat, inputArgs.rnum, nsnap );
+        write_array_to_file ( "mobil_aniani.out", qflux_aniani, inputArgs.rnum, nsnap );
 
         printf("NUMBER OF COLUMNS: %i AND NUMBER OF LINES: %i\n", ncol, nsnap);
 
         int fitstrt, nsnap_fit;
-        fitstrt = fitoffset * nsnap;
-        nsnap_fit = fitlength * nsnap;
+        fitstrt = inputArgs.fitoffset * nsnap;
+        nsnap_fit = inputArgs.fitlength * nsnap;
 
         //FUX| for now we'll make use of the conductivity calculation, which is essentially the same, except a couple of pre-factors
         //FUX| we use (E2C * NCHG / A2M^3) instead of the volume, need to count anions and cations
@@ -289,13 +269,13 @@ int main(int argc, char *argv[]) {
         // printf("NEINST: ");
         // calculate_conductivity(&(qflux_neinst[fitstrt]), nsnap_fit, temp, ntot*uniconv, timestep, fitstrt);
         printf("CATCAT: ");
-        elmo_cat = calculate_conductivity(&(qflux_catcat[fitstrt]), nsnap_fit, temp, ncat*uniconv, timestep, fitstrt, "MOBILITY IS:", "m^2/Vs");
+        elmo_cat = calculate_conductivity(&(qflux_catcat[fitstrt]), nsnap_fit, inputArgs.temp, ncat*uniconv, inputArgs.timestep, fitstrt, "MOBILITY IS:", "m^2/Vs");
         printf("ANIANI: ");
-        elmo_ani = calculate_conductivity(&(qflux_aniani[fitstrt]), nsnap_fit, temp, nani*uniconv, timestep, fitstrt, "MOBILITY IS:", "m^2/Vs");
+        elmo_ani = calculate_conductivity(&(qflux_aniani[fitstrt]), nsnap_fit, inputArgs.temp, nani*uniconv, inputArgs.timestep, fitstrt, "MOBILITY IS:", "m^2/Vs");
         // printf("ANICAT: ");
         // calculate_conductivity(&(qflux_anicat[fitstrt]), nsnap_fit, temp, ntot*uniconv, timestep, fitstrt, "MOBILITY IS:", "m^2/Vs");
 
-        printf("actual conductivity is: %14.8f\n", -1.*elmo_ani / avvol * nani * uniconv + 1.*elmo_cat / avvol * ncat * uniconv );
+        printf("actual conductivity is: %14.8f\n", -1.*elmo_ani / inputArgs.avvol * nani * uniconv + 1.*elmo_cat / inputArgs.avvol * ncat * uniconv );
 
         free ( qflux_neinaa );
         free ( qflux_neincc );
@@ -306,12 +286,12 @@ int main(int argc, char *argv[]) {
       break;
     case DIFF:
       {
-      int arrlen = nsnap * rnum;
+      int arrlen = nsnap * inputArgs.rnum;
 
       double *qflux_neinaa = (double *) calloc ( arrlen, sizeof(double));
       double *qflux_neincc = (double *) calloc ( arrlen, sizeof(double));
 
-      get_diff ( qflux_neinaa, qflux_neincc, xcom, ycom, zcom, chgs, ncol, nsnap, nrestart, dr, rstart, rnum, cell);
+      get_diff ( qflux_neinaa, qflux_neincc, xcom, ycom, zcom, chgs, ncol, nsnap, inputArgs.nrestart, inputArgs.dr, inputArgs.rstart, inputArgs.rnum, cell);
 
       write_array_to_file ( "diff_neinaa.out", qflux_neinaa, 1, nsnap );
       write_array_to_file ( "diff_neincc.out", qflux_neincc, 1, nsnap );
@@ -319,8 +299,8 @@ int main(int argc, char *argv[]) {
       printf("NUMBER OF COLUMNS: %i AND NUMBER OF LINES: %i\n", ncol, nsnap);
 
       int fitstrt, nsnap_fit;
-      fitstrt = fitoffset * nsnap;
-      nsnap_fit = fitlength * nsnap;
+      fitstrt = inputArgs.fitoffset * nsnap;
+      nsnap_fit = inputArgs.fitlength * nsnap;
 
       // first terms counter-acting conductivity stuff, last term units conversion angstrom^2/fs -> m^2/s
       //double uniconv = E2C*E2C / A2M / FS2S / KBOLTZ * 1.e5;
@@ -339,9 +319,9 @@ int main(int argc, char *argv[]) {
       }
 
       printf("NEINAA: ");
-      calculate_conductivity(&(qflux_neinaa[fitstrt]), nsnap_fit, nani, uniconv, timestep, fitstrt, "DIFFUSION IS:", "cm^2/s");
+      calculate_conductivity(&(qflux_neinaa[fitstrt]), nsnap_fit, nani, uniconv, inputArgs.timestep, fitstrt, "DIFFUSION IS:", "cm^2/s");
       printf("NEINCC: ");
-      calculate_conductivity(&(qflux_neincc[fitstrt]), nsnap_fit, ncat, uniconv, timestep, fitstrt, "DIFFUSION IS:", "cm^2/s");
+      calculate_conductivity(&(qflux_neincc[fitstrt]), nsnap_fit, ncat, uniconv, inputArgs.timestep, fitstrt, "DIFFUSION IS:", "cm^2/s");
 
       free ( qflux_neinaa );
       free ( qflux_neincc );

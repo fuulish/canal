@@ -138,7 +138,7 @@ void write_array_to_file ( char *fname, double *a, int ncol, int nlns )
   }
 }
 
-void read_input( char *fname, int *nrestart, double *avvol, double *temp, double *timestep, int *split, int *spatial, int *rnum, double *rstart, double *dr, char *xcom_fn, char *ycom_fn, char *zcom_fn, char *chgs_fn, char *cell_fn, int *task, double *fitoffset, double *fitlength, int *datastride, int *nmaxlns )
+inpArg_t read_input( char *fname )
 {
     FILE *datei;
     char *txt;
@@ -147,6 +147,7 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
     char *buf;
     size_t nbytes = 0;
 
+    inpArg_t inputArgs = {.nrestart = 1, .avvol = 1., .temp = 300., .timestep = 0.5, .split = 0, .spatial = 0, .rnum = 1, .rstart = 5., .dr = 2., .task = NTTN, .fitoffset = 0.1, .fitlength = 0.9, .datastride = 1, .nmaxlns = -1, };
     enum varset_e
     {
       NRESTART = INT_MIN,
@@ -197,116 +198,116 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
 
       if ( strstr(variable, "nrestart") != NULL )
       {
-        *nrestart = atol(value);
+        inputArgs.nrestart = atol(value);
         def_nrestart = 0;
       }
       else if ( strstr(variable, "avvol") != NULL )
       {
-        *avvol = atof(value);
+        inputArgs.avvol = atof(value);
         def_avvol = 0;
       }
       else if ( strstr(variable, "temp") != NULL )
       {
-        *temp= atof(value);
+        inputArgs.temp= atof(value);
         def_temp = 0;
       }
       else if ( strstr(variable, "timestep") != NULL )
       {
-        *timestep = atof(value);
+        inputArgs.timestep = atof(value);
         def_timestep = 0;
       }
       else if ( strstr(variable, "split") != NULL )
       {
-        *split = atoi(value);
+        inputArgs.split = atoi(value);
         def_split = 0;
       }
       else if ( strstr(variable, "spatial") != NULL )
       {
-        *spatial = 1;
+        inputArgs.spatial = 1;
         def_spatial = 0;
 
         buf = strtok (value, " ");
-        *rnum = atoi(buf);
+        inputArgs.rnum = atoi(buf);
 
-        if ( *rnum < 2 ) {
+        if ( inputArgs.rnum < 2 ) {
         // if ( (*rnum == 0) || (*rnum == 1) ) {
-          *rnum = 1;
-          *spatial = 0;
+          inputArgs.rnum = 1;
+          inputArgs.spatial = 0;
           continue;
         }
 
         buf = strtok (NULL, " ");
-        *rstart = atof(buf);
+        inputArgs.rstart = atof(buf);
 
         buf = strtok (NULL, " ");
-        *dr = atof(buf);
+        inputArgs.dr = atof(buf);
 
       }
       else if ( strstr(variable, "xcom") != NULL )
       {
         buf = strtok (value, " \n");
-        strcpy ( xcom_fn, buf );
+        strcpy ( inputArgs.xcom_fn, buf );
         def_xcom = 0;
       }
       else if ( strstr(variable, "ycom") != NULL )
       {
         buf = strtok (value, " \n");
-        strcpy ( ycom_fn, buf );
+        strcpy ( inputArgs.ycom_fn, buf );
         def_ycom = 0;
       }
       else if ( strstr(variable, "zcom") != NULL )
       {
         buf = strtok (value, " \n");
-        strcpy ( zcom_fn, buf );
+        strcpy ( inputArgs.zcom_fn, buf );
         def_zcom = 0;
       }
       else if ( strstr(variable, "chgs") != NULL )
       {
         buf = strtok (value, " \n");
-        strcpy ( chgs_fn, buf );
+        strcpy ( inputArgs.chgs_fn, buf );
         def_chgs = 0;
       }
       else if ( strstr(variable, "cell") != NULL )
       {
         buf = strtok (value, " \n");
-        strcpy ( cell_fn, buf );
+        strcpy ( inputArgs.cell_fn, buf );
         def_cell = 0;
       }
       else if ( strstr(variable, "task") != NULL )
       {
         if ( strstr ( value, "cond" ) != NULL )
-          *task = COND;
+          inputArgs.task = COND;
         else if ( strstr ( value, "velp" ) != NULL )
-          *task = VELP;
+          inputArgs.task = VELP;
         else if ( strstr ( value, "elmo" ) != NULL )
-          *task = ELMO;
+          inputArgs.task = ELMO;
         else if ( strstr ( value, "diff" ) != NULL )
-          *task = DIFF;
+          inputArgs.task = DIFF;
 
         def_task = 0;
       }
       else if ( strstr(variable, "fitoffset" ) != NULL )
       {
         buf = strtok (value, " \n");
-        *fitoffset = atof(buf);
+        inputArgs.fitoffset = atof(buf);
         def_fitoffset = 0;
       }
       else if ( strstr(variable, "fitlength" ) != NULL )
       {
         buf = strtok (value, " \n");
-        *fitlength = atof(buf);
+        inputArgs.fitlength = atof(buf);
         def_fitlength = 0;
       }
       else if ( strstr(variable, "datastride" ) != NULL )
       {
         buf = strtok (value, " \n");
-        *datastride = atol(buf);
+        inputArgs.datastride = atol(buf);
         def_datastride = 0;
       }
       else if ( strstr(variable, "nmaxlines" ) != NULL )
       {
         buf = strtok (value, " \n");
-        *nmaxlns = atol(buf);
+        inputArgs.nmaxlns = atol(buf);
         def_nmaxlines = 0;
       }
     }
@@ -356,7 +357,7 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
     if ( def_datastride == DATASTRIDE )
       print_warning ( YOU_KNOW_WHAT, "Using defaults for DATASTRIDE");
     else
-      *timestep *= *datastride;
+      inputArgs.timestep *= inputArgs.datastride;
 
     if ( def_nmaxlines == NMAXLINES )
       print_warning ( YOU_KNOW_WHAT, "Using defaults for NMAXLINES");
@@ -364,6 +365,8 @@ void read_input( char *fname, int *nrestart, double *avvol, double *temp, double
 
     fclose(datei);
     free(txt);
+
+    return inputArgs;
 
 }
 

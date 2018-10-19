@@ -27,7 +27,29 @@ enum tasks_e {
   DIFF,
 };
 
+typedef struct inpArg_s {
+  int nrestart;
+  double avvol;
+  double temp;
+  double timestep;
+  int split;
+  int spatial;
+  int rnum;
+  double rstart;
+  double dr;
+  int task;
+  double fitoffset;
+  double fitlength;
+  int datastride;
+  int nmaxlns;
+  char xcom_fn[100];
+  char ycom_fn[100];
+  char zcom_fn[100];
+  char chgs_fn[100];
+  char cell_fn[100];
+} inpArg_t;
+
 int analyze_file ( char *fname, int *ncol, int *nlns, char *delim);
 double *read_file_double(char *fname, int nlns, int ncol, char *delim, int stride);
 void write_array_to_file ( char *fname, double *a, int ncol, int nlns );
-void read_input( char *fname, int *nrestart, double *avvol, double *temp, double *timestep, int *split, int *spatial, int *rnum, double *rstart, double *dr, char *xcom_fn, char *ycom_fn, char *zcom_fn, char *chgs_fn, char *cell_fn, int *task, double *fitoffset, double *fitlength, int *datastride, int *nmaxlines );
+inpArg_t read_input( char *fname );
