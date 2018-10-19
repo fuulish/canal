@@ -105,6 +105,9 @@ int main(int argc, char *argv[]) {
   if( nrestart == -1 )
     nrestart = nsnap;
 
+  if( nmaxlns == -1 )
+    nmaxlns = nsnap;
+
   if( nrestart > nsnap ) {
     print_error( FATAL, "More restart points requested than snapshots available", __FILE__, __LINE__ );
     return FATAL;
