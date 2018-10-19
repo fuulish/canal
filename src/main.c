@@ -38,6 +38,9 @@ int main(int argc, char *argv[]) {
   int ccol, ncll;
   char delim[2] = " ";
 
+  // TODO: create new datastructure that holds input arguments
+  // pass that to read_input, e.g., inpArgs
+
   int nrestart = 1;
   double avvol = 1.;
   double temp = 300.;
@@ -66,6 +69,9 @@ int main(int argc, char *argv[]) {
     print_error ( INCOMPLETE_INPUT, "Input file is missing", __FILE__, __LINE__ );
 
   double *xcom, *ycom, *zcom, *chgs, *cell;
+
+  // TODO: let analyze file return the desired values in a structure
+  // e.g., inputFileCharacteristics
 
   analyze_file ( xcom_fn, &ncol, &nlns, delim );
   xcom = read_file_double ( xcom_fn, nlns, ncol, delim, datastride );
