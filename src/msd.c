@@ -313,7 +313,8 @@ int get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cnd
   divide_array_array_inplace ( cnd_ac, ptr_nrm_ac, 1, nlns*rmax, safely );
   divide_array_array_inplace ( cnd_aa, ptr_nrm_aa, 1, nlns*rmax, safely );
 
-#ifndef STRICT
+#ifdef DENORMALIZE
+  print_warning( EXPWARNING, "trying to get full conductivity back from spatial separation" );
   /* approximately accurate re-normalization to recover total conductivity */
   for( i=0; i<rmax; ++i ) {
     divide_array_number_inplace ( asub( cnd_cc, nlns, i, 0 ), ptr_nrm_cc[nlns*i]/nrestart, 1, nlns );
