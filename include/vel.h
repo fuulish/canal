@@ -26,7 +26,7 @@ enum diff_e {
   CDD,
 };
 
-double calculate_dot ( double *xi, double *yi, double *zi, double *xj, double *yj, double *zj, int nlns );
-double calculate_nrm ( double *xi, double *yi, double *zi, int nlns );
+double calculate_dot ( double *xi, double *yi, double *zi, double *xj, double *yj, double *zj, int nlns, int nskip );
+double calculate_nrm ( double *xi, double *yi, double *zi, int nlns, int nskip );
 void calculate_velocities ( double *vx, double *vy, double *vz, double *xi, double *yi, double *zi, int nlns, int timestep );
-void get_vflux_locl ( double *neinaa, double *neincc, double *cnd_cc, double *cnd_ac, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell, double timestep );
+void get_vflux_locl ( double *neinaa, double *neincc, double *cnd_cc, double *cnd_ac, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell, double timestep, int nskip );

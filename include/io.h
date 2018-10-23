@@ -42,6 +42,7 @@ typedef struct inpArg_s {
   double fitlength;
   int datastride;
   int nmaxlns;
+  int nskip;
   char xcom_fn[100];
   char ycom_fn[100];
   char zcom_fn[100];

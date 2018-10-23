@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
 
       if ( inputArgs.split ) {
 
-        int arrlen = nsnap * inputArgs.rnum;
+        int arrlen = nsnap * inputArgs.rnum / inputArgs.nskip;
 
         double *qflux_neinaa = (double *) calloc ( arrlen, sizeof(double));
         double *qflux_neincc = (double *) calloc ( arrlen, sizeof(double));
@@ -123,7 +123,7 @@ int main(int argc, char *argv[]) {
         double *qflux_anicat = (double *) calloc ( arrlen, sizeof(double));
         double *qflux_aniani = (double *) calloc ( arrlen, sizeof(double));
 
-        int rmax = get_qflux_srtd ( qflux_neinaa, qflux_neincc, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nsnap, inputArgs.nrestart, inputArgs.dr, inputArgs.rstart, inputArgs.rnum, cell, inputArgs.nmaxlns );
+        int rmax = get_qflux_srtd ( qflux_neinaa, qflux_neincc, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nsnap, inputArgs.nrestart, inputArgs.dr, inputArgs.rstart, inputArgs.rnum, cell, inputArgs.nmaxlns, inputArgs.nskip );
         // get_qflux_srtd ( qflux_neinst, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nsnap, nrestart);
 
         write_array_to_file ( "cond_neinaa.out", qflux_neinaa, 1, nsnap );
@@ -184,7 +184,7 @@ int main(int argc, char *argv[]) {
       else {
         double *qflux = (double *) calloc ( nsnap, sizeof(double));
 
-        get_qflux ( qflux, xcom, ycom, zcom, chgs, ncol, nsnap, inputArgs.nrestart);
+        get_qflux ( qflux, xcom, ycom, zcom, chgs, ncol, nsnap, inputArgs.nrestart, inputArgs.nskip );
 
         int fitstrt, nsnap_fit;
         fitstrt = inputArgs.fitoffset * nsnap;
@@ -212,7 +212,7 @@ int main(int argc, char *argv[]) {
       double *qflux_anicat = (double *) calloc ( arrlen, sizeof(double));
       double *qflux_aniani = (double *) calloc ( arrlen, sizeof(double));
 
-      get_vflux_locl ( qflux_neinaa, qflux_neincc, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nsnap, inputArgs.nrestart, inputArgs.dr, inputArgs.rstart, inputArgs.rnum, cell, inputArgs.timestep );
+      get_vflux_locl ( qflux_neinaa, qflux_neincc, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nsnap, inputArgs.nrestart, inputArgs.dr, inputArgs.rstart, inputArgs.rnum, cell, inputArgs.timestep, inputArgs.nskip );
 
       write_array_to_file ( "velp_neinaa.out", qflux_neinaa, 1, inputArgs.rnum );
       write_array_to_file ( "velp_neincc.out", qflux_neincc, 1, inputArgs.rnum );
@@ -240,7 +240,7 @@ int main(int argc, char *argv[]) {
         double *qflux_anicat = (double *) calloc ( arrlen, sizeof(double));
         double *qflux_aniani = (double *) calloc ( arrlen, sizeof(double));
 
-        get_mobil_srtd ( qflux_neinaa, qflux_neincc, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nsnap, inputArgs.nrestart, inputArgs.dr, inputArgs.rstart, inputArgs.rnum, cell );
+        get_mobil_srtd ( qflux_neinaa, qflux_neincc, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nsnap, inputArgs.nrestart, inputArgs.dr, inputArgs.rstart, inputArgs.rnum, cell, inputArgs.nskip );
 
         write_array_to_file ( "mobil_neinaa.out", qflux_neinaa, 1, nsnap );
         write_array_to_file ( "mobil_neincc.out", qflux_neincc, 1, nsnap );
@@ -291,7 +291,7 @@ int main(int argc, char *argv[]) {
       double *qflux_neinaa = (double *) calloc ( arrlen, sizeof(double));
       double *qflux_neincc = (double *) calloc ( arrlen, sizeof(double));
 
-      get_diff ( qflux_neinaa, qflux_neincc, xcom, ycom, zcom, chgs, ncol, nsnap, inputArgs.nrestart, inputArgs.dr, inputArgs.rstart, inputArgs.rnum, cell);
+      get_diff ( qflux_neinaa, qflux_neincc, xcom, ycom, zcom, chgs, ncol, nsnap, inputArgs.nrestart, inputArgs.dr, inputArgs.rstart, inputArgs.rnum, cell, inputArgs.nskip );
 
       write_array_to_file ( "diff_neinaa.out", qflux_neinaa, 1, nsnap );
       write_array_to_file ( "diff_neincc.out", qflux_neincc, 1, nsnap );

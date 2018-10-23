@@ -20,10 +20,10 @@ along with canal.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
-void calculate_msd_one ( double *out, double *x, double *xo, int nlns );
-void calculate_msd_xyz ( double *out, double *x, double *y, double *z, int nlns );
-void calculate_msd_xyz_cross ( double *out, double *xi, double *yi, double *zi, double *xj, double *yj, double *zj, int nlns);
-void get_qflux ( double *cnd, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart );
-void get_mobil_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cnd_ac, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell );
-int get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cnd_ca, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell, int nmaxlns );
-void get_diff ( double *neinaa, double *neincc, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell );
+void calculate_msd_one ( double *out, double *x, double *xo, int nlns, int nskip );
+void calculate_msd_xyz ( double *out, double *x, double *y, double *z, int nlns, int nskip );
+void calculate_msd_xyz_cross ( double *out, double *xi, double *yi, double *zi, double *xj, double *yj, double *zj, int nlns, int nskip );
+void get_qflux ( double *cnd, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, int nskip );
+void get_mobil_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cnd_ac, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell, int nskip );
+int get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cnd_ca, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell, int nmaxlns, int nskip );
+void get_diff ( double *neinaa, double *neincc, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell, int nksip );

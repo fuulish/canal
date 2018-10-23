@@ -147,7 +147,7 @@ inpArg_t read_input( char *fname )
     char *buf;
     size_t nbytes = 0;
 
-    inpArg_t inputArgs = {.nrestart = 1, .avvol = 1., .temp = 300., .timestep = 0.5, .split = 0, .spatial = 0, .rnum = 1, .rstart = 5., .dr = 2., .task = NTTN, .fitoffset = 0.1, .fitlength = 0.9, .datastride = 1, .nmaxlns = -1, };
+    inpArg_t inputArgs = {.nrestart = 1, .avvol = 1., .temp = 300., .timestep = 0.5, .split = 0, .spatial = 0, .rnum = 1, .rstart = 5., .dr = 2., .task = NTTN, .fitoffset = 0.1, .fitlength = 0.9, .datastride = 1, .nmaxlns = -1, .nskip = 1 };
     enum varset_e
     {
       NRESTART = INT_MIN,
@@ -166,6 +166,7 @@ inpArg_t read_input( char *fname )
       FITLENGTH,
       DATASTRIDE,
       NMAXLINES,
+      NSKIP,
     };
 
     int def_nrestart = NRESTART;
@@ -184,6 +185,7 @@ inpArg_t read_input( char *fname )
     int def_fitlength = FITLENGTH;
     int def_datastride = DATASTRIDE;
     int def_nmaxlines = NMAXLINES;
+    int def_nskip = NSKIP;
 
     datei = fopen(fname, "r");
 
@@ -310,6 +312,12 @@ inpArg_t read_input( char *fname )
         inputArgs.nmaxlns = atol(buf);
         def_nmaxlines = 0;
       }
+      else if ( strstr(variable, "nskip" ) != NULL )
+      {
+        buf = strtok (value, " \n");
+        inputArgs.nskip = atol(buf);
+        def_nskip = 0;
+      }
     }
 
     if ( def_nrestart == NRESTART )
@@ -361,6 +369,11 @@ inpArg_t read_input( char *fname )
 
     if ( def_nmaxlines == NMAXLINES )
       print_warning ( YOU_KNOW_WHAT, "Using defaults for NMAXLINES");
+
+    if ( def_nskip == NSKIP )
+      print_warning ( YOU_KNOW_WHAT, "Using defaults for NSKIP");
+    else
+      inputArgs.timestep /= inputArgs.nskip;
 
 
     fclose(datei);

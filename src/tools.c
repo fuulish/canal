@@ -93,9 +93,9 @@ void divide_array_array_safely ( double *out, double *a, double *b, int ncol, in
 
 }
 
-void multiply_array_array_inplace ( double *a, double *b, int ncol, int nlns )
+void multiply_array_array_inplace ( double *a, double *b, int ncol, int nlns, int nskip )
 {
-  multiply_array_array ( a, a, b, ncol, nlns );
+  multiply_array_array ( a, a, b, ncol, nlns, nskip );
 }
 
 void divide_array_array_inplace ( double *a, double *b, int ncol, int nlns, int safely )
@@ -106,17 +106,22 @@ void divide_array_array_inplace ( double *a, double *b, int ncol, int nlns, int 
     divide_array_array ( a, a, b, ncol, nlns );
 }
 
-void multiply_array_array ( double *out, double *a, double *b, int ncol, int nlns )
+void multiply_array_array ( double *out, double *a, double *b, int ncol, int nlns, int nskip )
 {
   int i, j;
+  int cnt;
 
 #ifdef OPENMP
 #pragma omp parallel for default(none) \
   private(i,j) shared(out, nlns, ncol, a, b)
 #endif
-  for ( i=0; i<ncol; ++i )
-    for ( j=0; j<nlns; ++j )
-      ael(out, nlns, i, j) = ael(a, nlns, i, j) * ael(b, nlns, i, j);
+  for ( i=0; i<ncol; ++i ) {
+    cnt = 0;
+    for ( j=0; j<nlns*nskip; j += nskip ) {
+      ael(out, nlns, i, cnt) = ael(a, nlns, i, cnt) * ael(b, nlns, i, cnt);
+      ++cnt;
+    }
+  }
 
 }
 
@@ -157,26 +162,31 @@ void multiply_array_number_inplace (double *out, double f, int ncol, int nlns)
   multiply_array_number ( out, out, f, ncol, nlns );
 }
 
-void subtract_array_number ( double *out, double *a, double f, int ncol, int nlns )
+void subtract_array_number ( double *out, double *a, double f, int ncol, int nlns, int nskip )
 {
-  add_array_number ( out, a, -f, ncol, nlns );
+  add_array_number ( out, a, -f, ncol, nlns, nskip );
 }
-void add_array_number_inplace ( double *out, double f, int ncol, int nlns )
+void add_array_number_inplace ( double *out, double f, int ncol, int nlns, int nskip )
 {
-  add_array_number ( out, out, f, ncol, nlns );
+  add_array_number ( out, out, f, ncol, nlns, nskip );
 }
 
-void add_array_number ( double *out, double *a, double f, int ncol, int nlns )
+void add_array_number ( double *out, double *a, double f, int ncol, int nlns, int nskip )
 {
   int i, j;
+  int cnt;
 
 #ifdef OPENMP
 #pragma omp parallel for default(none) \
   private(i,j) shared(out, nlns, ncol, a, f)
 #endif
-  for ( i=0; i<ncol; ++i )
-    for ( j=0; j<nlns; ++j )
-      ael(out, nlns, i, j) = ael(a, nlns, i, j) + f;
+  for ( i=0; i<ncol; ++i ) {
+    cnt = 0;
+    for ( j=0; j<nlns*nskip; j += nskip ) {
+      ael(out, nlns, i, cnt) = ael(a, nlns, i, cnt) + f;
+      ++cnt;
+    }
+  }
 }
 
 void sum_array_rnum( double *out, int rnum, int nlns )

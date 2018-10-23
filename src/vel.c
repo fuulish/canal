@@ -30,7 +30,7 @@ along with canal.  If not, see <http://www.gnu.org/licenses/>.
 #include "io.h"
 #endif
 
-double calculate_dot ( double *xi, double *yi, double *zi, double *xj, double *yj, double *zj, int nlns )
+double calculate_dot ( double *xi, double *yi, double *zi, double *xj, double *yj, double *zj, int nlns, int nskip )
 {
 
   int i;
@@ -40,12 +40,12 @@ double calculate_dot ( double *xi, double *yi, double *zi, double *xj, double *y
 
   double out = 0.;
 
-  multiply_array_array ( fnl, xi, xj, 1, nlns );
+  multiply_array_array ( fnl, xi, xj, 1, nlns, nskip );
 
-  multiply_array_array ( tmp, yi, yj, 1, nlns );
+  multiply_array_array ( tmp, yi, yj, 1, nlns, nskip );
   add_arrays_inplace ( fnl, tmp, 1, nlns );
 
-  multiply_array_array ( tmp, zi, zj, 1, nlns );
+  multiply_array_array ( tmp, zi, zj, 1, nlns, nskip );
   add_arrays_inplace ( fnl, tmp, 1, nlns );
 
   for ( i=0; i<nlns; i++ )
@@ -57,9 +57,9 @@ double calculate_dot ( double *xi, double *yi, double *zi, double *xj, double *y
 
 }
 
-double calculate_nrm ( double *xi, double *yi, double *zi, int nlns )
+double calculate_nrm ( double *xi, double *yi, double *zi, int nlns, int nskip )
 {
-  double dot = calculate_dot ( xi, yi, zi, xi, yi, zi, nlns );
+  double dot = calculate_dot ( xi, yi, zi, xi, yi, zi, nlns, nskip );
 
   return sqrt(dot);
 }
@@ -106,7 +106,7 @@ void calculate_velocities ( double *vx, double *vy, double *vz, double *xi, doub
 }
 
 //FUDO| we shouldn't need neinst, because it'll always be 1
-void get_vflux_locl ( double *neinaa, double *neincc, double *cnd_cc, double *cnd_ac, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell, double timestep )
+void get_vflux_locl ( double *neinaa, double *neincc, double *cnd_cc, double *cnd_ac, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell, double timestep, int nskip )
 {
   int i, j, n;
   int nlns_tmp;
@@ -179,9 +179,9 @@ void get_vflux_locl ( double *neinaa, double *neincc, double *cnd_cc, double *cn
         zj = asub(z, nlns, j, n);
 
         nlns_tmp = 1;
-        double dot = calculate_dot ( ptr_vxi, ptr_vyi, ptr_vzi, ptr_vxj, ptr_vyj, ptr_vzj, nlns_tmp );
-        double nrm_i = calculate_nrm ( ptr_vxi, ptr_vyi, ptr_vzi, nlns_tmp );
-        double nrm_j = calculate_nrm ( ptr_vxj, ptr_vyj, ptr_vzj, nlns_tmp );
+        double dot = calculate_dot ( ptr_vxi, ptr_vyi, ptr_vzi, ptr_vxj, ptr_vyj, ptr_vzj, nlns_tmp, nskip );
+        double nrm_i = calculate_nrm ( ptr_vxi, ptr_vyi, ptr_vzi, nlns_tmp, nskip );
+        double nrm_j = calculate_nrm ( ptr_vxj, ptr_vyj, ptr_vzj, nlns_tmp, nskip );
 
         dot /= (nrm_i * nrm_j);
 
