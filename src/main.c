@@ -123,7 +123,7 @@ int main(int argc, char *argv[]) {
         double *qflux_anicat = (double *) calloc ( arrlen, sizeof(double));
         double *qflux_aniani = (double *) calloc ( arrlen, sizeof(double));
 
-        int rmax = get_qflux_srtd ( qflux_neinaa, qflux_neincc, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nsnap, inputArgs.nrestart, inputArgs.dr, inputArgs.rstart, inputArgs.rnum, cell, inputArgs.nmaxlns );
+        int rmax = get_qflux_srtd ( qflux_neinaa, qflux_neincc, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nsnap, inputArgs.nrestart, inputArgs.dr, inputArgs.rstart, inputArgs.rnum, cell, inputArgs.nmaxlns, inputArgs.nskip );
         // get_qflux_srtd ( qflux_neinst, qflux_catcat, qflux_anicat, qflux_aniani, xcom, ycom, zcom, chgs, ncol, nsnap, nrestart);
 
         write_array_to_file ( "cond_neinaa.out", qflux_neinaa, 1, nsnap );

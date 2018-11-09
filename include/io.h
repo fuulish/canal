@@ -47,6 +47,7 @@ typedef struct inpArg_s {
   char zcom_fn[100];
   char chgs_fn[100];
   char cell_fn[100];
+  int nskip;
 } inpArg_t;
 
 int analyze_file ( char *fname, int *ncol, int *nlns, char *delim);

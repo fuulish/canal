@@ -30,6 +30,42 @@ along with canal.  If not, see <http://www.gnu.org/licenses/>.
 #include "io.h"
 #endif
 
+void calculate_msd_xyz_cross_skipped ( double *out, double *xi, double *yi, double *zi, double *xj, double *yj, double *zj, int nlns, int nskip )
+{
+
+  // double *tmp = (double *) malloc ( nlns * sizeof (double));
+  double tmp[nlns];
+  double xitmp[nlns];
+  double yitmp[nlns];
+  double zitmp[nlns];
+  double xjtmp[nlns];
+  double yjtmp[nlns];
+  double zjtmp[nlns];
+
+  int cnt = 0;
+  for( int i=0; i<nlns; ++i ) {
+    xitmp[i] = xi[i*nskip];
+    yitmp[i] = yi[i*nskip];
+    zitmp[i] = zi[i*nskip];
+
+    xjtmp[i] = xj[i*nskip];
+    yjtmp[i] = yj[i*nskip];
+    zjtmp[i] = zj[i*nskip];
+  }
+
+
+  calculate_msd_one ( out, xitmp, xjtmp, nlns );
+
+  calculate_msd_one ( tmp, yitmp, yjtmp, nlns );
+  add_arrays_inplace ( out, tmp, 1, nlns );
+  
+  calculate_msd_one ( tmp, zitmp, zjtmp, nlns );
+  add_arrays_inplace ( out, tmp, 1, nlns );
+
+  // free (tmp);
+
+}
+
 void calculate_msd_one ( double *out, double *x, double *xo, int nlns )
 {
   double xdlt[nlns];
@@ -45,6 +81,33 @@ void calculate_msd_one ( double *out, double *x, double *xo, int nlns )
 
   // free ( xdlt );
   // free ( xodlt );
+}
+
+void calculate_msd_xyz_skipped ( double *out, double *x, double *y, double *z, int nlns, int nskip )
+{
+  // double *tmp = (double *) malloc ( nlns * sizeof (double));
+  double tmp[nlns];
+  double xtmp[nlns];
+  double ytmp[nlns];
+  double ztmp[nlns];
+
+  int cnt = 0;
+  for( int i=0; i<nlns; ++i ) {
+    xtmp[i] = x[i*nskip];
+    ytmp[i] = y[i*nskip];
+    ztmp[i] = z[i*nskip];
+  }
+
+  calculate_msd_one ( out, xtmp, xtmp, nlns );
+
+  calculate_msd_one ( tmp, ytmp, ytmp, nlns );
+  add_arrays_inplace ( out, tmp, 1, nlns );
+  
+  calculate_msd_one ( tmp, ztmp, ztmp, nlns );
+  add_arrays_inplace ( out, tmp, 1, nlns );
+
+  // free (tmp);
+
 }
 
 void calculate_msd_xyz ( double *out, double *x, double *y, double *z, int nlns )
@@ -149,7 +212,7 @@ void get_qflux ( double *cnd, double *x, double *y, double *z, double *chg, int 
   // free (msd);
 }
 
-int get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cnd_ac, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell, int nmaxlns )
+int get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cnd_ac, double *cnd_aa, double *x, double *y, double *z, double *chg, int ncol, int nlns, int nrestart, double dr, double rstart, int rnum, double *cell, int nmaxlns, int nskip )
 {
   int i, j, n;
   int nlns_tmp;
@@ -214,7 +277,7 @@ int get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cnd
         yj = asub(y, nlns, j, offcnt);
         zj = asub(z, nlns, j, offcnt);
 
-        calculate_msd_xyz_cross ( tmp, xi, yi, zi, xj,  yj, zj, nlns_tmp );
+        calculate_msd_xyz_cross_skipped ( tmp, xi, yi, zi, xj,  yj, zj, nlns_tmp, nskip );
         multiply_array_number_inplace ( tmp, chg[i]*chg[j]*scale, 1, nlns_tmp );
 
         if ( i == j ) {
