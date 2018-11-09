@@ -28,17 +28,19 @@ void add_array_array_skipped ( double *out, double *a, double *b, int ncol, int 
   int cnti, cntj;
   cnti = 0;
 
+  int nlns_tmp = nlns / nskip;
+
 #ifdef OPENMP
 #pragma omp parallel for default(none) \
   private(i,j) shared(out, nlns, ncol, a, b)
 #endif
   for ( i=0; i<ncol; ++i ) {
     cntj  = 0;
-    for ( j=0; j<nlns; ++j ) {
-      ael(out, nlns, i, j) = ael(a, nlns, i, j) + ael(b, nlns, i, j);
-      ++cntj;
+    for ( j=0; j<nlns_tmp; ++j ) {
+      ael(out, nlns_tmp, i, j) = ael(a, nlns, i, j*nskip) + ael(b, nlns, i, j*nskip);
+      // ++cntj;
     }
-    ++cnti;
+    // ++cnti;
   }
 
 }
@@ -138,17 +140,19 @@ void multiply_array_array_skipped ( double *out, double *a, double *b, int ncol,
   int cnti, cntj;
   cnti = 0;
 
+  int nlns_tmp = nlns / nskip;
+
 #ifdef OPENMP
 #pragma omp parallel for default(none) \
   private(i,j) shared(out, nlns, ncol, a, b)
 #endif
   for ( i=0; i<ncol; ++i ) {
-    cntj = 0;
-    for ( j=0; j<nlns; ++j ) {
-      ael(out, nlns, i, j) = ael(a, nlns, i, j) * ael(b, nlns, i, j);
-      ++cntj;
+    // cntj = 0;
+    for ( j=0; j<nlns_tmp; ++j ) {
+      ael(out, nlns_tmp, i, j) = ael(a, nlns, i, j*nskip) * ael(b, nlns, i, j*nskip);
+      // ++cntj;
     }
-    ++cnti;
+    // ++cnti;
   }
 
 }
@@ -223,17 +227,19 @@ void add_array_number_skipped ( double *out, double *a, double f, int ncol, int 
   int cnti, cntj;
   cnti = 0;
 
+  int nlns_tmp = nlns / nskip;
+
 #ifdef OPENMP
 #pragma omp parallel for default(none) \
   private(i,j) shared(out, nlns, ncol, a, f)
 #endif
   for ( i=0; i<ncol; ++i ) {
     cntj = 0;
-    for ( j=0; j<nlns; ++j ) {
-      ael(out, nlns, i, j) = ael(a, nlns, i, j) + f;
-      ++cntj;
+    for ( j=0; j<nlns_tmp; ++j ) {
+      ael(out, nlns_tmp, i, j) = ael(a, nlns, i, j*nskip) + f;
+      // ++cntj;
     }
-    ++cnti;
+    // ++cnti;
   }
 }
 
