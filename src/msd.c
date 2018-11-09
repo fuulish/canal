@@ -35,36 +35,53 @@ void calculate_msd_xyz_cross_skipped ( double *out, double *xi, double *yi, doub
 
   // double *tmp = (double *) malloc ( nlns * sizeof (double));
   double tmp[nlns];
-  double xitmp[nlns];
-  double yitmp[nlns];
-  double zitmp[nlns];
-  double xjtmp[nlns];
-  double yjtmp[nlns];
-  double zjtmp[nlns];
+  // double xitmp[nlns];
+  // double yitmp[nlns];
+  // double zitmp[nlns];
+  // double xjtmp[nlns];
+  // double yjtmp[nlns];
+  // double zjtmp[nlns];
 
-  int cnt = 0;
-  for( int i=0; i<nlns; ++i ) {
-    xitmp[i] = xi[i*nskip];
-    yitmp[i] = yi[i*nskip];
-    zitmp[i] = zi[i*nskip];
+  // int cnt = 0;
+  // for( int i=0; i<nlns; ++i ) {
+  //   xitmp[i] = xi[i*nskip];
+  //   yitmp[i] = yi[i*nskip];
+  //   zitmp[i] = zi[i*nskip];
 
-    xjtmp[i] = xj[i*nskip];
-    yjtmp[i] = yj[i*nskip];
-    zjtmp[i] = zj[i*nskip];
-  }
+  //   xjtmp[i] = xj[i*nskip];
+  //   yjtmp[i] = yj[i*nskip];
+  //   zjtmp[i] = zj[i*nskip];
+  // }
 
-  int nlns_skipped = nlns / nskip;
+  // int nlns_skipped = nlns / nskip;
 
-  calculate_msd_one ( out, xitmp, xjtmp, nlns_skipped );
+  calculate_msd_one_skipped ( out, xi, xj, nlns, nskip );
 
-  calculate_msd_one ( tmp, yitmp, yjtmp, nlns_skipped );
-  add_arrays_inplace ( out, tmp, 1, nlns_skipped );
+  calculate_msd_one_skipped ( tmp, yi, yj, nlns, nskip );
+  add_arrays_inplace_skipped ( out, tmp, 1, nlns, nskip );
   
-  calculate_msd_one ( tmp, zitmp, zjtmp, nlns_skipped );
-  add_arrays_inplace ( out, tmp, 1, nlns_skipped );
+  calculate_msd_one_skipped ( tmp, zi, zj, nlns, nskip );
+  add_arrays_inplace_skipped ( out, tmp, 1, nlns, nskip );
 
   // free (tmp);
 
+}
+
+void calculate_msd_one_skipped ( double *out, double *x, double *xo, int nlns, int nskip )
+{
+  double xdlt[nlns];
+  double xodlt[nlns];
+  // this one saves 10% - the others not so much
+  // double *xdlt = (double *) malloc ( nlns * sizeof(double) );
+  // double *xodlt = (double *) malloc ( nlns * sizeof(double) );
+
+  subtract_array_number_skipped ( xdlt, x, x[0], 1, nlns, nskip);
+  subtract_array_number_skipped ( xodlt, xo, xo[0], 1, nlns, nskip);
+
+  multiply_array_array_skipped ( out, xdlt, xodlt, 1, nlns, nskip);
+
+  // free ( xdlt );
+  // free ( xodlt );
 }
 
 void calculate_msd_one ( double *out, double *x, double *xo, int nlns )

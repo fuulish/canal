@@ -362,6 +362,11 @@ inpArg_t read_input( char *fname )
     if ( def_fitlength == FITLENGTH )
       print_warning ( YOU_KNOW_WHAT, "Using defaults for FITLENGTH");
 
+    if ( def_datastride == NSKIP )
+      print_warning ( YOU_KNOW_WHAT, "Using defaults for NSKIP");
+    else
+      inputArgs.timestep *= inputArgs.nskip;
+
     if ( def_datastride == DATASTRIDE )
       print_warning ( YOU_KNOW_WHAT, "Using defaults for DATASTRIDE");
     else
