@@ -53,14 +53,15 @@ void calculate_msd_xyz_cross_skipped ( double *out, double *xi, double *yi, doub
     zjtmp[i] = zj[i*nskip];
   }
 
+  int nlns_skipped = nlns / nskip;
 
-  calculate_msd_one ( out, xitmp, xjtmp, nlns );
+  calculate_msd_one ( out, xitmp, xjtmp, nlns_skipped );
 
-  calculate_msd_one ( tmp, yitmp, yjtmp, nlns );
-  add_arrays_inplace ( out, tmp, 1, nlns );
+  calculate_msd_one ( tmp, yitmp, yjtmp, nlns_skipped );
+  add_arrays_inplace ( out, tmp, 1, nlns_skipped );
   
-  calculate_msd_one ( tmp, zitmp, zjtmp, nlns );
-  add_arrays_inplace ( out, tmp, 1, nlns );
+  calculate_msd_one ( tmp, zitmp, zjtmp, nlns_skipped );
+  add_arrays_inplace ( out, tmp, 1, nlns_skipped );
 
   // free (tmp);
 
@@ -98,13 +99,15 @@ void calculate_msd_xyz_skipped ( double *out, double *x, double *y, double *z, i
     ztmp[i] = z[i*nskip];
   }
 
-  calculate_msd_one ( out, xtmp, xtmp, nlns );
+  int nlns_skipped = nlns / nskip;
 
-  calculate_msd_one ( tmp, ytmp, ytmp, nlns );
-  add_arrays_inplace ( out, tmp, 1, nlns );
+  calculate_msd_one ( out, xtmp, xtmp, nlns_skipped );
+
+  calculate_msd_one ( tmp, ytmp, ytmp, nlns_skipped );
+  add_arrays_inplace ( out, tmp, 1, nlns_skipped );
   
-  calculate_msd_one ( tmp, ztmp, ztmp, nlns );
-  add_arrays_inplace ( out, tmp, 1, nlns );
+  calculate_msd_one ( tmp, ztmp, ztmp, nlns_skipped );
+  add_arrays_inplace ( out, tmp, 1, nlns_skipped );
 
   // free (tmp);
 
@@ -257,8 +260,10 @@ int get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cnd
     offcnt = n*offset;
     nlns_tmp = nlns - offcnt;
     nlns_tmp = nlns_tmp > nmaxlns ? nmaxlns : nlns_tmp;
+    int backup_nlns = nlns_tmp;
 
-    add_array_number_inplace ( nrm, 1., 1, nlns_tmp );
+    int nlns_skip = nlns_tmp / nskip;
+    add_array_number_inplace ( nrm, 1., 1, nlns_skip );
 
     // different molecules
     for ( i=0; i<ncol; ++i ) {
@@ -277,7 +282,10 @@ int get_qflux_srtd ( double *neinaa, double *neincc, double *cnd_cc, double *cnd
         yj = asub(y, nlns, j, offcnt);
         zj = asub(z, nlns, j, offcnt);
 
+        nlns_tmp = backup_nlns;
         calculate_msd_xyz_cross_skipped ( tmp, xi, yi, zi, xj,  yj, zj, nlns_tmp, nskip );
+        nlns_tmp = nlns_skip;
+
         multiply_array_number_inplace ( tmp, chg[i]*chg[j]*scale, 1, nlns_tmp );
 
         if ( i == j ) {
