@@ -54,3 +54,4 @@ int analyze_file ( char *fname, int *ncol, int *nlns, char *delim);
 double *read_file_double(char *fname, int nlns, int ncol, char *delim, int stride);
 void write_array_to_file ( char *fname, double *a, int ncol, int nlns );
 inpArg_t read_input( char *fname );
+double *read_com_file( char *fname, int nlns, int ncol, char *delim, int stride, double** x, double** y, double** z );

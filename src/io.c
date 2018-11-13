@@ -117,6 +117,80 @@ double *read_file_double(char *fname, int nlns, int ncol, char *delim, int strid
 
 }
 
+double *read_com_file( char *fname, int nlns, int ncol, char *delim, int stride, double** x, double** y, double** z )
+{
+  FILE *datei;
+  char *txt;
+  char *tok;
+  int i;
+  int j =0;
+  int cnt = 0;
+
+  size_t nbytes = 0;
+
+  int localNlns = nlns / stride; // savety/rounding margin
+  int ndatpt = ncol * localNlns;
+
+  *x = (double *) malloc ( ndatpt * sizeof(double) );
+  *y = (double *) malloc ( ndatpt * sizeof(double) );
+  *z = (double *) malloc ( ndatpt * sizeof(double) );
+
+  datei = fopen(fname, "r");
+
+  int isnap = 0;
+  int endReached = 0;
+
+  if ( datei != NULL ) {
+
+    // read snapshot
+      // read ncol lines (corresponds to #atoms)
+      // split each line into its x y and z component
+      // assign to correct data
+
+    while (!endReached)
+    {
+      int offset = isnap * ncol;
+      for (int iline = 0; iline < ncol; ++iline)
+      {
+        if (getline(&txt, &nbytes, datei) != -1)
+        {
+          tok = strtok(txt, delim);
+          ael(*x, localNlns, isnap, iline) = atof(tok);
+
+          tok = strtok(NULL, delim);
+          ael(*y, localNlns, isnap, iline) = atof(tok);
+
+          tok = strtok(NULL, delim);
+          ael(*z, localNlns, isnap, iline) = atof(tok);
+        }
+        else
+        {
+          endReached = 1;
+        }
+      }
+
+      ++isnap;
+
+      for (int iskip = 0; iskip < stride - 1; ++iskip)
+      {
+        for (int iline = 0; iline < ncol; ++iline)
+        {
+          if (!(getline(&txt, &nbytes, datei) != -1))
+          {
+            endReached = 1;
+          }
+        }
+        ++isnap;
+      }
+    }
+
+    fclose ( datei );
+    free ( txt );
+
+  }
+
+}
+
 void write_array_to_file ( char *fname, double *a, int ncol, int nlns )
 {
   int i, j;
